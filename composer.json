@@ -1,0 +1,47 @@
+{
+  "name": "mobilestock/laravel-gatekeeper",
+  "description": "OAuth 2.0 Helper",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "MobileStock",
+      "email": "fabio@mobilestock.com.br"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "MobileStock\\OAuth2Helper\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "require": {
+    "laravel/socialite": "^5.16",
+    "illuminate/support": "^11.29",
+    "illuminate/http": "^11.29",
+    "illuminate/contracts": "^11.29",
+    "illuminate/routing": "^11.29"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "MobileStock\\OAuth2Helper\\Providers\\OAuthServiceProvider"
+      ]
+    }
+  },
+  "require-dev": {
+    "pestphp/pest": "^3.5",
+    "orchestra/testbench": "^9.5",
+    "guzzlehttp/guzzle": "^7.9"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
+    }
+  }
+}
