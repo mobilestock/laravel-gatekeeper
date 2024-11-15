@@ -1,6 +1,6 @@
 <?php
 
-use MobileStock\OAuth2Helper\Controllers\UserController;
+use MobileStock\Gatekeeper\Controllers\UserController;
 
 Route::prefix('oauth')->group(function () {
     Route::get('/redirect', [UserController::class, 'redirect']);

@@ -4,9 +4,9 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Illuminate\Contracts\Auth\UserProvider;
 use Laravel\Socialite\Facades\Socialite;
-use MobileStock\OAuth2Helper\Socialite\User;
-use MobileStock\OAuth2Helper\Providers\OAuthServiceProvider;
-use MobileStock\OAuth2Helper\TokenGuard;
+use MobileStock\Gatekeeper\Socialite\User;
+use MobileStock\Gatekeeper\Providers\OAuthServiceProvider;
+use MobileStock\Gatekeeper\TokenGuard;
 
 it('registers the token_users guard', function () {
     Config::set('auth.guards.token_users', [

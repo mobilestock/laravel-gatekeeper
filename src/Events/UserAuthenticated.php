@@ -1,8 +1,8 @@
 <?php
 
-namespace MobileStock\OAuth2Helper\Events;
+namespace MobileStock\Gatekeeper\Events;
 
-use MobileStock\OAuth2Helper\Socialite\User;
+use MobileStock\Gatekeeper\Socialite\User;
 
 class UserAuthenticated
 {

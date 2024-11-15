@@ -4,7 +4,7 @@ namespace Tests;
 
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\SocialiteServiceProvider;
-use MobileStock\OAuth2Helper\Providers\OAuthServiceProvider;
+use MobileStock\Gatekeeper\Providers\OAuthServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase

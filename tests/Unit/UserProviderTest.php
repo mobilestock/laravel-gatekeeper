@@ -1,10 +1,10 @@
 <?php
 
-use MobileStock\OAuth2Helper\Socialite\UsersProvider;
+use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Support\Facades\Config;
-use MobileStock\OAuth2Helper\Socialite\User;
+use MobileStock\Gatekeeper\Socialite\User;
 
 it('builds the correct authorization URL', function () {
     $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');

@@ -1,6 +1,6 @@
 <?php
 
-namespace MobileStock\OAuth2Helper\Socialite;
+namespace MobileStock\Gatekeeper\Socialite;
 
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Two\AbstractProvider;

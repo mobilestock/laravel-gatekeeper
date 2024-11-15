@@ -1,6 +1,6 @@
 <?php
 
-namespace MobileStock\OAuth2Helper;
+namespace MobileStock\Gatekeeper;
 
 use Illuminate\Contracts\Auth\UserProvider as AuthUserProvider;
 use Illuminate\Http\Request;

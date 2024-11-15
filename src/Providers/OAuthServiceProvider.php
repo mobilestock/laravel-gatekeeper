@@ -1,14 +1,14 @@
 <?php
 
-namespace MobileStock\OAuth2Helper\Providers;
+namespace MobileStock\Gatekeeper\Providers;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Contracts\Factory;
-use MobileStock\OAuth2Helper\Socialite\UsersProvider;
-use MobileStock\OAuth2Helper\TokenGuard;
+use MobileStock\Gatekeeper\Socialite\UsersProvider;
+use MobileStock\Gatekeeper\TokenGuard;
 
 class OAuthServiceProvider extends ServiceProvider
 {

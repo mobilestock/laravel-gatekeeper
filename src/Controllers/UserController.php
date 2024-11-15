@@ -1,10 +1,10 @@
 <?php
 
-namespace MobileStock\OAuth2Helper\Controllers;
+namespace MobileStock\Gatekeeper\Controllers;
 
 use Illuminate\Routing\Controller;
 use Laravel\Socialite\Facades\Socialite;
-use MobileStock\OAuth2Helper\Events\UserAuthenticated;
+use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
 class UserController extends Controller
 {

@@ -2,8 +2,8 @@
 
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
-use MobileStock\OAuth2Helper\Socialite\User;
-use MobileStock\OAuth2Helper\Events\UserAuthenticated;
+use MobileStock\Gatekeeper\Socialite\User;
+use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
 it('redirects to the oauth server', function () {
     $response = $this->get('/oauth/redirect');

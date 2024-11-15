@@ -11,7 +11,7 @@
   ],
   "autoload": {
     "psr-4": {
-      "MobileStock\\OAuth2Helper\\": "src/"
+      "MobileStock\\Gatekeeper\\": "src/"
     }
   },
   "autoload-dev": {
@@ -30,7 +30,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "MobileStock\\OAuth2Helper\\Providers\\OAuthServiceProvider"
+        "MobileStock\\Gatekeeper\\Providers\\OAuthServiceProvider"
       ]
     }
   },
