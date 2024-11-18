@@ -8,7 +8,9 @@ use MobileStock\Gatekeeper\Events\UserAuthenticated;
 it('redirects to the oauth server', function () {
     $response = $this->get('/oauth/redirect');
 
-    $response->assertStatus(302);
+    $response->assertRedirect(
+        'https://frontend-url.com?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code'
+    );
 });
 
 it('dispatches an event and redirects to the front-end with a user token', function () {
