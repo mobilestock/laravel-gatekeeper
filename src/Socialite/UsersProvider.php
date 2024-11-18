@@ -10,17 +10,17 @@ class UsersProvider extends AbstractProvider
 {
     protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(Config::get('services.users.frontend'), $state);
+        return $this->buildAuthUrlFromBase(Config::get('services.users.frontend_url'), $state);
     }
 
     protected function getTokenUrl(): string
     {
-        return Config::get('services.users.backend') . 'oauth/token';
+        return Config::get('services.users.api_url') . 'oauth/token';
     }
 
     protected function getUserByToken($token): array
     {
-        $response = $this->getHttpClient()->get(Config::get('services.users.backend') . 'api/user', [
+        $response = $this->getHttpClient()->get(Config::get('services.users.api_url') . 'api/user', [
             RequestOptions::HEADERS => ['Authorization' => 'Bearer ' . $token],
         ]);
 

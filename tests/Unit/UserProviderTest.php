@@ -12,7 +12,7 @@ it('builds the correct authorization URL', function () {
     $authUrl = invokeProtectedMethod($provider, 'getAuthUrl', ['test-state']);
 
     expect($authUrl)->toBe(
-        Config::get('services.users.frontend') .
+        Config::get('services.users.frontend_url') .
             '?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code&state=test-state'
     );
 });
@@ -22,7 +22,7 @@ it('returns the correct token URL', function () {
 
     $tokenUrl = invokeProtectedMethod($provider, 'getTokenUrl');
 
-    expect($tokenUrl)->toBe(Config::get('services.users.backend') . 'oauth/token');
+    expect($tokenUrl)->toBe(Config::get('services.users.api_url') . 'oauth/token');
 });
 
 it('fetches the correct user data by token', function () {
@@ -32,7 +32,7 @@ it('fetches the correct user data by token', function () {
     $mockedClient = Mockery::mock(Client::class);
     $mockedClient
         ->shouldReceive('get')
-        ->with(Config::get('services.users.backend') . 'api/user', [
+        ->with(Config::get('services.users.api_url') . 'api/user', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
             ],
