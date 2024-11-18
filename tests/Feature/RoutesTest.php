@@ -9,7 +9,7 @@ it('redirects to the oauth server', function () {
     $response = $this->get('/oauth/redirect');
 
     $response->assertRedirect(
-        'https://frontend-url.com?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code'
+        'http://localhost?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code'
     );
 });
 
