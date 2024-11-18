@@ -2,6 +2,7 @@
 
 namespace MobileStock\Gatekeeper\Socialite;
 
+use GuzzleHttp\RequestOptions;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Two\AbstractProvider;
 
@@ -20,12 +21,10 @@ class UsersProvider extends AbstractProvider
     protected function getUserByToken($token)
     {
         $response = $this->getHttpClient()->get(Config::get('services.users.backend') . 'api/user', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
-            ],
+            RequestOptions::HEADERS => ['Authorization' => 'Bearer ' . $token],
         ]);
 
-        return json_decode($response->getBody()->getContents(), true);
+        return json_decode($response->getBody(), true);
     }
 
     protected function mapUserToObject(array $user)
