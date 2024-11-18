@@ -3,6 +3,7 @@
 namespace MobileStock\Gatekeeper\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
@@ -17,7 +18,7 @@ class UserController extends Controller
     {
         $user = Socialite::driver('users')->stateless()->user();
 
-        event(new UserAuthenticated($user));
+        Event::dispatch(new UserAuthenticated($user));
 
         /**
          * @issue https://github.com/mobilestock/backend/issues/638
