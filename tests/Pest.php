@@ -2,7 +2,7 @@
 
 uses(Tests\TestCase::class)->in(__DIR__);
 
-function invokeProtectedMethod(object $class, string $methodName, array $parameters = [])
+function invokeProtectedMethod(object $class, string $methodName, array $parameters = []): mixed
 {
     $method = new ReflectionMethod($class, $methodName);
     $method->setAccessible(true);
