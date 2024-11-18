@@ -32,7 +32,7 @@ it('retrieves user by access token with the correct data', function () {
         ]
     );
 
-    /** @var UserProvider $provider */
+    /** @var Mockery\MockInterface|UserProvider $provider */
     $provider = Mockery::mock(UserProvider::class);
     $provider
         ->shouldReceive('retrieveByCredentials')
