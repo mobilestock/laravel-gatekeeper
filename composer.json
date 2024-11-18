@@ -19,7 +19,6 @@
       "Tests\\": "tests/"
     }
   },
-  "minimum-stability": "stable",
   "require": {
     "laravel/socialite": "^5.16",
     "illuminate/support": "^11.29",
