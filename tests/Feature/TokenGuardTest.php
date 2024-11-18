@@ -23,6 +23,20 @@ it('registers the token_users guard', function () {
     expect($guard)->toBeInstanceOf(TokenGuard::class);
 });
 
+it('registers the token_users guard without auth provider', function () {
+    Config::set('auth.guards.token_users', [
+        'driver' => 'token_users',
+    ]);
+
+    $provider = new GatekeeperServiceProvider($this->app);
+
+    invokeProtectedMethod($provider, 'registerTokenUsersGuard');
+
+    $guard = Auth::guard('token_users');
+
+    expect($guard)->toBeInstanceOf(TokenGuard::class);
+});
+
 it('retrieves user by access token with the correct data', function () {
     $request = Request::create(
         '/api/protected-route',
