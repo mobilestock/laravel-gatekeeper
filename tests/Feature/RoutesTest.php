@@ -18,8 +18,10 @@ it('dispatches an event and redirects to the front-end with a user token', funct
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
+        ->getMock()
         ->shouldReceive('stateless')
         ->andReturnSelf()
+        ->getMock()
         ->shouldReceive('user')
         ->andReturn($socialiteUser);
 

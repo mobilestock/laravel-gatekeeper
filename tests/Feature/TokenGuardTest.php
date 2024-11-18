@@ -45,6 +45,7 @@ it('retrieves user by access token with the correct data', function () {
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
+        ->getMock()
         ->shouldReceive('userFromToken')
         ->with('test-access-token')
         ->andReturn($socialiteUser);
@@ -95,6 +96,7 @@ it('returns a null user if an invalid token is sent', function () {
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
+        ->getMock()
         ->shouldReceive('userFromToken')
         ->andThrow(new Exception('Invalid token'));
 
@@ -114,6 +116,7 @@ it('returns a null user if no token is sent', function () {
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
+        ->getMock()
         ->shouldReceive('userFromToken')
         ->andThrow(new Exception('No token was sent'));
 
@@ -140,6 +143,7 @@ it('retrieves user by access token without a provider', function () {
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
+        ->getMock()
         ->shouldReceive('userFromToken')
         ->with('test-access-token')
         ->andReturn($socialiteUser);
