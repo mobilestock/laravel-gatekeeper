@@ -8,17 +8,17 @@ use Laravel\Socialite\Two\AbstractProvider;
 
 class UsersProvider extends AbstractProvider
 {
-    protected function getAuthUrl($state)
+    protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase(Config::get('services.users.frontend'), $state);
     }
 
-    protected function getTokenUrl()
+    protected function getTokenUrl(): string
     {
         return Config::get('services.users.backend') . 'oauth/token';
     }
 
-    protected function getUserByToken($token)
+    protected function getUserByToken($token): array
     {
         $response = $this->getHttpClient()->get(Config::get('services.users.backend') . 'api/user', [
             RequestOptions::HEADERS => ['Authorization' => 'Bearer ' . $token],
@@ -27,7 +27,7 @@ class UsersProvider extends AbstractProvider
         return json_decode($response->getBody(), true);
     }
 
-    protected function mapUserToObject(array $user)
+    protected function mapUserToObject(array $user): User
     {
         return (new User())->setRaw($user)->map($user);
     }
