@@ -1,6 +1,6 @@
 {
   "name": "mobilestock/laravel-gatekeeper",
-  "description": "OAuth 2.0 Helper",
+  "description": "Laravel Gatekeeper is a package that provides a simple way to authenticate users using OAuth 2.0. Internally, it uses Laravel Socialite to authenticate users, Laravel Guards to manage the authentication process, and Laravel Routes to handle the OAuth 2.0 flow.",
   "type": "library",
   "license": "MIT",
   "authors": [
