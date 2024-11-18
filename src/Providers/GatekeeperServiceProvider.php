@@ -27,7 +27,7 @@ class GatekeeperServiceProvider extends ServiceProvider
 
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../config/services.php', 'services');
+        $this->mergeConfigFrom(__DIR__ . '/../config/gatekeeper.php', 'gatekeeper');
     }
 
     protected function registerTokenUsersGuard(): void
