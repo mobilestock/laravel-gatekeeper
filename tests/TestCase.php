@@ -4,7 +4,7 @@ namespace Tests;
 
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\SocialiteServiceProvider;
-use MobileStock\Gatekeeper\Providers\OAuthServiceProvider;
+use MobileStock\Gatekeeper\Providers\GatekeeperServiceProvider;
 use Orchestra\Testbench\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -22,6 +22,6 @@ abstract class TestCase extends BaseTestCase
 
     protected function getPackageProviders($app)
     {
-        return [OAuthServiceProvider::class, SocialiteServiceProvider::class];
+        return [GatekeeperServiceProvider::class, SocialiteServiceProvider::class];
     }
 }

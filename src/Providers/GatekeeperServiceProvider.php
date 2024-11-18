@@ -10,7 +10,7 @@ use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use MobileStock\Gatekeeper\TokenGuard;
 
-class OAuthServiceProvider extends ServiceProvider
+class GatekeeperServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {

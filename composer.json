@@ -29,7 +29,7 @@
   "extra": {
     "laravel": {
       "providers": [
-        "MobileStock\\Gatekeeper\\Providers\\OAuthServiceProvider"
+        "MobileStock\\Gatekeeper\\Providers\\GatekeeperServiceProvider"
       ]
     }
   },
