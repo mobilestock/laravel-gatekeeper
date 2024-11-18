@@ -9,17 +9,12 @@ use Laravel\Socialite\Facades\Socialite;
 class TokenGuard extends \Illuminate\Auth\TokenGuard
 {
     public function __construct(
-        ?AuthUserProvider $provider,
-        Request $request,
-        $inputKey = 'id',
-        $storageKey = 'id',
-        $hash = false
+        protected ?AuthUserProvider $provider,
+        protected Request $request,
+        protected $inputKey = 'id',
+        protected $storageKey = 'id',
+        protected $hash = false
     ) {
-        $this->hash = $hash;
-        $this->request = $request;
-        $this->provider = $provider;
-        $this->inputKey = $inputKey;
-        $this->storageKey = $storageKey;
     }
 
     public function user()
