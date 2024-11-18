@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Socialite\Contracts\Factory;
+use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use MobileStock\Gatekeeper\TokenGuard;
 
@@ -21,12 +21,10 @@ class OAuthServiceProvider extends ServiceProvider
 
         $this->registerTokenUsersGuard();
 
-        $socialite = $this->app->make(Factory::class);
-
-        $socialite->extend('users', function () use ($socialite) {
+        Socialite::extend('users', function () {
             $config = Config::get('services.users');
 
-            return $socialite->buildProvider(UsersProvider::class, $config);
+            return Socialite::buildProvider(UsersProvider::class, $config);
         });
     }
 
