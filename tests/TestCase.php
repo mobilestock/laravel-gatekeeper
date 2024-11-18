@@ -15,8 +15,8 @@ abstract class TestCase extends BaseTestCase
             'client_id' => 'client-id',
             'client_secret' => 'client-secret',
             'redirect' => 'redirect-url',
-            'frontend' => 'https://frontend-url.com',
-            'backend' => 'https://backend-url.com/',
+            'frontend_url' => 'https://frontend-url.com',
+            'api_url' => 'https://backend-url.com/',
         ]);
     }
 
