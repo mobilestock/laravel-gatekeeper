@@ -3,7 +3,9 @@
 namespace MobileStock\Gatekeeper\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Redirect;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
@@ -23,6 +25,6 @@ class UserController extends Controller
         /**
          * @issue https://github.com/mobilestock/backend/issues/638
          */
-        return redirect(env('FRONT_URL') . 'auth?access-token=' . $user->token);
+        return Redirect::to(Config::get('app.front_url') . 'auth?access-token=' . $user->token);
     }
 }
