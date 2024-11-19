@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Socialite\User;
@@ -35,5 +36,5 @@ it('dispatches an event and redirects to the front-end with a user token', funct
         return $event->user->token === $socialiteUser->token;
     });
 
-    $response->assertRedirect(env('FRONT_URL') . 'auth?access-token=test-token');
+    $response->assertRedirect(Config::get('app.frontend_url') . 'auth?access-token=test-token');
 });
