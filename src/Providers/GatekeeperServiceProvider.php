@@ -24,7 +24,7 @@ class GatekeeperServiceProvider extends ServiceProvider
             return Socialite::buildProvider(UsersProvider::class, $config);
         });
 
-        Config::set('services.users.frontend_url', Config::get('gatekeeper.users_frontend_url'));
+        Config::set('services.users.front_url', Config::get('gatekeeper.users_front_url'));
         Config::set('services.users.api_url', Config::get('gatekeeper.users_api_url'));
     }
 

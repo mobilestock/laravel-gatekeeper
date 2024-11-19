@@ -12,7 +12,7 @@ it('builds the correct authorization URL', function () {
     $authUrl = invokeProtectedMethod($provider, 'getAuthUrl', ['test-state']);
 
     expect($authUrl)->toBe(
-        Config::get('services.users.frontend_url') .
+        Config::get('services.users.front_url') .
             '?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code&state=test-state'
     );
 });

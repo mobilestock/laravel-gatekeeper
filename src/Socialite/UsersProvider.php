@@ -10,7 +10,7 @@ class UsersProvider extends AbstractProvider
 {
     protected function getAuthUrl($state): string
     {
-        return $this->buildAuthUrlFromBase(Config::get('services.users.frontend_url'), $state);
+        return $this->buildAuthUrlFromBase(Config::get('services.users.front_url'), $state);
     }
 
     protected function getTokenUrl(): string

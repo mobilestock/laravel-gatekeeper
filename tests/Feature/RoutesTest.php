@@ -36,5 +36,5 @@ it('dispatches an event and redirects to the front-end with a user token', funct
         return $event->user->token === $socialiteUser->token;
     });
 
-    $response->assertRedirect(Config::get('app.frontend_url') . 'auth?access-token=test-token');
+    $response->assertRedirect(Config::get('app.front_url') . 'auth?access-token=test-token');
 });
