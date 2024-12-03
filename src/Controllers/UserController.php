@@ -25,6 +25,6 @@ class UserController extends Controller
         /**
          * @issue https://github.com/mobilestock/backend/issues/638
          */
-        return Redirect::to(Config::get('app.front_url') . 'auth?access-token=' . $user->token);
+        return Redirect::to(Config::get('app.front_url') . 'auth?gatekeeper-access-token=' . $user->token);
     }
 }
