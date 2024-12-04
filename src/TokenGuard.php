@@ -30,7 +30,7 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
 
         $user = null;
 
-        $accessToken = $this->request->header('access-token');
+        $accessToken = $this->request->header('gatekeeper-access-token');
 
         try {
             $user = Socialite::driver('users')->userFromToken($accessToken);
