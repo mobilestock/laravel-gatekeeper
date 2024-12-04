@@ -42,7 +42,7 @@ it('retrieves user by access token with the correct data', function () {
         '/api/protected-route',
         'GET',
         server: [
-            'HTTP_ACCESS-TOKEN' => 'test-access-token',
+            'HTTP_GATEKEEPER-ACCESS-TOKEN' => 'test-access-token',
         ]
     );
 
@@ -100,7 +100,7 @@ it('returns a null user if an invalid token is sent', function () {
         '/api/protected-route',
         'GET',
         server: [
-            'HTTP_ACCESS-TOKEN' => 'invalid-access-token',
+            'HTTP_GATEKEEPER-ACCESS-TOKEN' => 'invalid-access-token',
         ]
     );
 
@@ -146,7 +146,7 @@ it('retrieves user by access token without a provider', function () {
         '/api/protected-route',
         'GET',
         server: [
-            'HTTP_ACCESS-TOKEN' => 'test-access-token',
+            'HTTP_GATEKEEPER-ACCESS-TOKEN' => 'test-access-token',
         ]
     );
 
