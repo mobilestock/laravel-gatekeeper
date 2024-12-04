@@ -38,9 +38,12 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
         }
 
         if (!empty($user) && !empty($this->provider)) {
-            $user = $this->provider->retrieveByCredentials([
+            $entity = $this->provider->retrieveByCredentials([
                 $this->storageKey => $user->id,
             ]);
+            $entity->userInfo = $user->user;
+            unset($entity->userInfo['id']);
+            return $this->user = $entity;
         }
 
         return $this->user = $user;
