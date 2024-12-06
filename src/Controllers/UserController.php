@@ -11,6 +11,8 @@ use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
 class UserController extends Controller
 {
+    public const REDIRECT_PARAM = 'GATEKEEPER_access-token';
+
     public function redirect()
     {
         return Socialite::driver('users')->stateless()->redirect();
