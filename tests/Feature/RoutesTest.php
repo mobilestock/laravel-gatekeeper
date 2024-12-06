@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
+use MobileStock\Gatekeeper\Controllers\UserController;
 use MobileStock\Gatekeeper\Socialite\User;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
@@ -36,5 +37,11 @@ it('dispatches an event and redirects to the front-end with a user token', funct
         return $event->user->token === $socialiteUser->token;
     });
 
-    $response->assertRedirect(Config::get('app.front_url') . 'auth?gatekeeper-access-token=test-token');
+    $response->assertRedirect(
+        Config::get('app.front_url') .
+            'auth?' .
+            http_build_query([
+                UserController::REDIRECT_PARAM => $socialiteUser->token,
+            ])
+    );
 });
