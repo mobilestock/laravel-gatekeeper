@@ -4,6 +4,7 @@ namespace MobileStock\Gatekeeper;
 
 use Illuminate\Contracts\Auth\UserProvider as AuthUserProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Laravel\Socialite\Facades\Socialite;
 
 class TokenGuard extends \Illuminate\Auth\TokenGuard
@@ -43,9 +44,7 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
             ]);
 
             if (!empty($entity)) {
-                $userInfo = $user->user;
-                unset($userInfo['id']);
-                $entity->userInfo = $userInfo;
+                $entity->userInfo = Arr::except($user->user, 'id');
                 $user = $entity;
             }
         }
