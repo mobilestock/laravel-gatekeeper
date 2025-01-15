@@ -2,9 +2,11 @@
 
 namespace MobileStock\Gatekeeper\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
@@ -30,5 +32,10 @@ class UserController extends Controller
         return Redirect::to(
             Config::get('app.front_url') . 'auth?' . http_build_query([self::REDIRECT_PARAM => $user->token])
         );
+    }
+
+    public function logout(Request $request)
+    {
+        Http::withToken($request->bearerToken())->post(Config::get('services.users.api_url') . 'api/logout');
     }
 }
