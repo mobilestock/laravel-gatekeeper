@@ -6,6 +6,7 @@ use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Controllers\UserController;
 use MobileStock\Gatekeeper\Socialite\User;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
+use Symfony\Component\HttpFoundation\Response;
 
 it('redirects to the oauth server', function () {
     $response = $this->get('/oauth/redirect');
@@ -44,4 +45,15 @@ it('dispatches an event and redirects to the front-end with a user token', funct
                 UserController::REDIRECT_PARAM => $socialiteUser->token,
             ])
     );
+});
+
+it('logs out the user successfully', function () {
+    Http::fake([
+        Config::get('services.users.api_url') . 'api/logout' => Http::response(),
+    ]);
+
+    $bearerToken = 'testBearerToken';
+    $response = $this->post('/oauth/logout', [], ['Authorization' => 'Bearer ' . $bearerToken]);
+
+    $response->assertStatus(Response::HTTP_OK);
 });
