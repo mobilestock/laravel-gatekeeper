@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Request;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
@@ -35,7 +36,7 @@ class UserController extends Controller
 
     public function logout()
     {
-        Http::withToken($request->bearerToken())
+        Http::withToken(Request::bearerToken())
             ->post(Config::get('services.users.api_url') . 'api/logout')
             ->throw();
     }
