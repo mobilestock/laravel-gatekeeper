@@ -63,7 +63,7 @@ it('returns the user if it is already set', function () {
     /** @var Request $request */
     $request = Mockery::mock(Request::class);
 
-    $tokenGuard = new TokenGuard($provider, $request);
+    $tokenGuard = new TokenGuard($request);
     $tokenGuard->setUser($mockUser);
 
     $user = $tokenGuard->user();
