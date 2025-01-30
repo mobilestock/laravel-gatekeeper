@@ -26,9 +26,10 @@ class UserController extends Controller
 
     public function callback()
     {
+        $state = explode(',', Request::get('state'));
         $user = Socialite::driver('users')->stateless()->user();
 
-        Event::dispatch(new UserAuthenticated($user));
+        Event::dispatch(new UserAuthenticated($user, $state));
 
         /**
          * @issue https://github.com/mobilestock/backend/issues/638
