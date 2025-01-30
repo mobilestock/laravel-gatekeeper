@@ -17,7 +17,11 @@ class UserController extends Controller
 
     public function redirect()
     {
-        return Socialite::driver('users')->stateless()->redirect();
+        $state = Request::get('state');
+        dd($state);
+        return Socialite::driver('users')
+            ->with(['state' => $state])
+            ->redirect();
     }
 
     public function callback()
