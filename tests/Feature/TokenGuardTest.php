@@ -2,7 +2,6 @@
 
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
-use Illuminate\Contracts\Auth\UserProvider;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Providers\GatekeeperServiceProvider;
 use MobileStock\Gatekeeper\Socialite\User;
