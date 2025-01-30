@@ -59,8 +59,6 @@ it('returns the user if it is already set', function () {
     $mockUser = Mockery::mock(Authenticatable::class);
     $mockUser->id = 1;
 
-    /** @var UserProvider $provider */
-    $provider = Mockery::mock(UserProvider::class);
 
     /** @var Request $request */
     $request = Mockery::mock(Request::class);
