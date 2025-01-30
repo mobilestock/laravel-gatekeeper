@@ -80,8 +80,6 @@ it('returns a null user if an invalid token is sent', function () {
         ]
     );
 
-    /** @var UserProvider $provider */
-    $provider = Mockery::mock(UserProvider::class);
 
     Socialite::shouldReceive('driver')
         ->with('users')
