@@ -48,7 +48,7 @@ it('retrieves user by access token with the correct data', function () {
 
     expect($user)
         ->toBeObject()
-        ->and($user->establishment_id)
+        ->and($user->id)
         ->toBe(12)
         ->and($user->name)
         ->toBe('Test Establishment');
