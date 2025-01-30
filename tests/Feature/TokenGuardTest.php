@@ -103,7 +103,7 @@ it('returns a null user if no token is sent', function () {
         ->shouldReceive('userFromToken')
         ->andThrow(new Exception('No token was sent'));
 
-    $tokenGuard = new TokenGuard($provider, $request);
+    $tokenGuard = new TokenGuard($request);
 
     $user = $tokenGuard->user();
 
