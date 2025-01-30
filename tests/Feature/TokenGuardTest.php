@@ -32,7 +32,7 @@ it('retrieves user by access token with the correct data', function () {
 
     $socialiteUser = new User();
     $socialiteUser->id = 12;
-    $socialiteUser->user = ['name' => 'Test Establishment'];
+    $socialiteUser->name = 'Test Establishment';
 
     Socialite::shouldReceive('driver')
         ->with('users')
