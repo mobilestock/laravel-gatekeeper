@@ -6,7 +6,7 @@ use MobileStock\Gatekeeper\Socialite\User;
 
 class UserAuthenticated
 {
-    public function __construct(public User $user, public string $state)
+    public function __construct(public User $user, public array $state)
     {
     }
 }
