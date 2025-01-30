@@ -42,7 +42,7 @@ it('retrieves user by access token with the correct data', function () {
         ->with('test-access-token')
         ->andReturn($socialiteUser);
 
-    $guard = new TokenGuard($provider, $request);
+    $guard = new TokenGuard($request);
 
     $user = $guard->user();
 
