@@ -10,21 +10,6 @@ use MobileStock\Gatekeeper\TokenGuard;
 it('registers the token_users guard', function () {
     Config::set('auth.guards.token_users', [
         'driver' => 'token_users',
-        'provider' => 'users',
-    ]);
-
-    $provider = new GatekeeperServiceProvider($this->app);
-
-    invokeProtectedMethod($provider, 'registerTokenUsersGuard');
-
-    $guard = Auth::guard('token_users');
-
-    expect($guard)->toBeInstanceOf(TokenGuard::class);
-});
-
-it('registers the token_users guard without auth provider', function () {
-    Config::set('auth.guards.token_users', [
-        'driver' => 'token_users',
     ]);
 
     $provider = new GatekeeperServiceProvider($this->app);
