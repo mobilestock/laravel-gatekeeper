@@ -35,12 +35,8 @@ class GatekeeperServiceProvider extends ServiceProvider
 
     protected function registerTokenUsersGuard(): void
     {
-        Auth::extend('token_users', function ($app, $name, array $config) {
-            if (isset($config['provider'])) {
-                $provider = Auth::createUserProvider($config['provider']);
-            }
-
-            return new TokenGuard($provider ?? null, Request::instance());
+        Auth::extend('token_users', function () {
+            return new TokenGuard(Request::instance());
         });
     }
 }
