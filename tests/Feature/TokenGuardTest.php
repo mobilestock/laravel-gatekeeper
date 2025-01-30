@@ -86,7 +86,7 @@ it('returns a null user if an invalid token is sent', function () {
         ->shouldReceive('userFromToken')
         ->andThrow(new Exception('Invalid token'));
 
-    $tokenGuard = new TokenGuard($provider, $request);
+    $tokenGuard = new TokenGuard($request);
 
     $user = $tokenGuard->user();
 
