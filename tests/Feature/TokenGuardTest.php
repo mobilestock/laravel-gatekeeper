@@ -30,13 +30,6 @@ it('retrieves user by access token with the correct data', function () {
         ]
     );
 
-    /** @var Mockery\MockInterface|UserProvider $provider */
-    $provider = Mockery::mock(UserProvider::class);
-    $provider
-        ->shouldReceive('retrieveByCredentials')
-        ->with(['id' => 12])
-        ->andReturn((object) ['establishment_id' => 12, 'name' => 'Test Establishment']);
-
     $socialiteUser = new User();
     $socialiteUser->id = 12;
     $socialiteUser->user = ['name' => 'Test Establishment'];
