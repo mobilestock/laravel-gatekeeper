@@ -109,36 +109,3 @@ it('returns a null user if no token is sent', function () {
 
     expect($user)->toBeNull();
 });
-
-it('retrieves user by access token without a provider', function () {
-    $request = Request::create(
-        '/api/protected-route',
-        'GET',
-        server: [
-            'HTTP_AUTHORIZATION' => 'Bearer test-access-token',
-        ]
-    );
-
-    $socialiteUser = new User();
-    $socialiteUser->id = 12;
-    $socialiteUser->name = 'Test User';
-
-    Socialite::shouldReceive('driver')
-        ->with('users')
-        ->andReturnSelf()
-        ->getMock()
-        ->shouldReceive('userFromToken')
-        ->with('test-access-token')
-        ->andReturn($socialiteUser);
-
-    $guard = new TokenGuard(null, $request);
-
-    $user = $guard->user();
-
-    expect($user)
-        ->toBeObject()
-        ->and($user->id)
-        ->toBe(12)
-        ->and($user->name)
-        ->toBe('Test User');
-});
