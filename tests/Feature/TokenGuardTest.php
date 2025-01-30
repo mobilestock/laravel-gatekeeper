@@ -96,9 +96,6 @@ it('returns a null user if an invalid token is sent', function () {
 it('returns a null user if no token is sent', function () {
     $request = Request::create('/api/protected-route', 'GET');
 
-    /** @var UserProvider $provider */
-    $provider = Mockery::mock(UserProvider::class);
-
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
