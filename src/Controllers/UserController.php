@@ -11,9 +11,6 @@ use Illuminate\Support\Facades\Request;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
-/**
- * @hideFromAPIDocumentation
- */
 class UserController extends Controller
 {
     public const REDIRECT_PARAM = 'GATEKEEPER_access-token';
