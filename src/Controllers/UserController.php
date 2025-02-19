@@ -17,7 +17,6 @@ class UserController extends Controller
 
     public function redirect()
     {
-        // TODO: testar como se comporta se não mandar state
         $state = Request::get('state');
         return Socialite::driver('users')
             ->with(['state' => $state])
@@ -27,7 +26,6 @@ class UserController extends Controller
 
     public function callback()
     {
-        // TODO: testar como se comporta se não mandar state
         $state = explode(',', Request::get('state'));
         $user = Socialite::driver('users')->stateless()->user();
 
