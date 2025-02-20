@@ -27,6 +27,11 @@ class UserController extends Controller
     public function callback()
     {
         $state = explode(',', Request::get('state'));
+
+        if (Request::get('state') === "null") {
+            $state = [];
+        }
+
         $user = Socialite::driver('users')->stateless()->user();
 
         Event::dispatch(new UserAuthenticated($user, $state));
