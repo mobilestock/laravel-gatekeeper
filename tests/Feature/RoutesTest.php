@@ -18,10 +18,13 @@ it('redirects to the oauth server', function () {
 
 dataset('callbackDataset', [
     'valid state' => ['valid_state', ['valid_state']],
-    'nullable state' => ['null', []]
+    'nullable state' => ['null', []],
 ]);
 
-it('dispatches an event and redirects to the front-end with a user token and custom state', function (string $state, array $result) {
+it('dispatches an event and redirects to the front-end with a user token and custom state', function (
+    string $state,
+    array $result
+) {
     $socialiteUser = new User();
     $socialiteUser->token = 'test-token';
 

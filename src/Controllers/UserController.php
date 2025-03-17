@@ -28,7 +28,7 @@ class UserController extends Controller
     {
         $state = explode(',', Request::get('state'));
 
-        if (Request::get('state') === "null") {
+        if (Request::get('state') === 'null') {
             $state = [];
         }
 
