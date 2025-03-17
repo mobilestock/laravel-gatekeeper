@@ -11,8 +11,4 @@ use Laravel\Socialite\Two\User as TwoUser;
  */
 class User extends TwoUser
 {
-    public function getAuthIdentifier()
-    {
-        return $this->id;
-    }
 }
