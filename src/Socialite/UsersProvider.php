@@ -20,7 +20,7 @@ class UsersProvider extends AbstractProvider
 
     protected function getUserByToken($token): array
     {
-        $response = $this->getHttpClient()->get(Config::get('services.users.api_url') . 'api/user', [
+        $response = $this->getHttpClient()->get(Config::get('services.users.api_url') . 'api/me', [
             RequestOptions::HEADERS => ['Authorization' => 'Bearer ' . $token],
         ]);
 
