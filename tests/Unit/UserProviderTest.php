@@ -32,7 +32,7 @@ it('fetches the correct user data by token', function () {
     $mockedClient = Mockery::mock(Client::class);
     $mockedClient
         ->shouldReceive('get')
-        ->with(Config::get('services.users.api_url') . 'api/user', [
+        ->with(Config::get('services.users.api_url') . 'api/me', [
             'headers' => [
                 'Authorization' => 'Bearer ' . $token,
             ],
