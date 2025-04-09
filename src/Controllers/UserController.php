@@ -17,14 +17,24 @@ class UserController extends Controller
 
     public function redirect()
     {
-        return Socialite::driver('users')->stateless()->redirect();
+        $state = Request::get('state');
+        return Socialite::driver('users')
+            ->with(['state' => $state])
+            ->stateless()
+            ->redirect();
     }
 
     public function callback()
     {
+        $state = explode(',', Request::get('state'));
+
+        if (Request::get('state') === 'null') {
+            $state = [];
+        }
+
         $user = Socialite::driver('users')->stateless()->user();
 
-        Event::dispatch(new UserAuthenticated($user));
+        Event::dispatch(new UserAuthenticated($user, $state));
 
         /**
          * @issue https://github.com/mobilestock/backend/issues/638

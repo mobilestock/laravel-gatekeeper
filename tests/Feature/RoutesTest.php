@@ -16,7 +16,15 @@ it('redirects to the oauth server', function () {
     );
 });
 
-it('dispatches an event and redirects to the front-end with a user token', function () {
+dataset('callbackDataset', [
+    'valid state' => ['valid_state', ['valid_state']],
+    'nullable state' => ['null', []],
+]);
+
+it('dispatches an event and redirects to the front-end with a user token and custom state', function (
+    string $state,
+    array $result
+) {
     $socialiteUser = new User();
     $socialiteUser->token = 'test-token';
 
@@ -32,10 +40,10 @@ it('dispatches an event and redirects to the front-end with a user token', funct
 
     Event::fake();
 
-    $response = $this->get('/oauth/callback');
+    $response = $this->get('/oauth/callback?state=' . $state);
 
-    Event::assertDispatched(function (UserAuthenticated $event) use ($socialiteUser) {
-        return $event->user->token === $socialiteUser->token;
+    Event::assertDispatched(function (UserAuthenticated $event) use ($socialiteUser, $result) {
+        return $event->user->token === $socialiteUser->token && $event->state === $result;
     });
 
     $response->assertRedirect(
@@ -45,7 +53,7 @@ it('dispatches an event and redirects to the front-end with a user token', funct
                 UserController::REDIRECT_PARAM => $socialiteUser->token,
             ])
     );
-});
+})->with('callbackDataset');
 
 it('logs out the user successfully', function () {
     Http::fake([
