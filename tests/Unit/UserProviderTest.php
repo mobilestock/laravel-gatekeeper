@@ -3,6 +3,7 @@
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Config;
 use MobileStock\Gatekeeper\Socialite\User;
 
@@ -77,4 +78,18 @@ it('maps user data to a Socialite User class', function () {
         ->toBe('http://image.com/test')
         ->and($user->phone_number)
         ->toBe('1234567890');
+});
+
+it('adapts socialite user to a authenticatable class', function () {
+    $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');
+
+    $socialiteUser = new User();
+    $socialiteUser->id = 12;
+    $socialiteUser->name = 'Test Establishment';
+
+    $authUser = $provider->adaptSociliteUserIntoAuthenticatable($socialiteUser);
+
+    expect($authUser)->toBeInstanceOf(Authenticatable::class);
+    expect($authUser->id)->toBe($socialiteUser->id);
+    expect($authUser->name)->toBe($socialiteUser->name);
 });
