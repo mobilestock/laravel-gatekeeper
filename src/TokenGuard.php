@@ -26,7 +26,8 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
         $accessToken = $this->request->bearerToken();
 
         try {
-            $user = Socialite::driver('users')->userFromToken($accessToken);
+            $sociliteUser = Socialite::driver('users')->userFromToken($accessToken);
+            $user = Socialite::driver('users')->adaptSociliteUserIntoAuthenticatable($sociliteUser);
         } catch (\Throwable) {
         }
 
