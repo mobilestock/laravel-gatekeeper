@@ -35,7 +35,7 @@ class UsersProvider extends AbstractProvider
         return (new User())->setRaw($user)->map($user);
     }
 
-    public function adaptSociliteUserIntoAuthenticatable(SocialiteUser $user): Authenticatable
+    public function adaptSocialiteUserIntoAuthenticatable(SocialiteUser $user): Authenticatable
     {
         $genericUser = new GenericUser(get_object_vars($user));
 
