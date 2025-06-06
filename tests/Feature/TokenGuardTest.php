@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
@@ -34,13 +35,18 @@ it('retrieves user by access token with the correct data', function () {
     $socialiteUser->id = 12;
     $socialiteUser->name = 'Test Establishment';
 
+    $genericUser = new GenericUser(get_object_vars($socialiteUser));
+
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
         ->getMock()
         ->shouldReceive('userFromToken')
         ->with('test-access-token')
-        ->andReturn($socialiteUser);
+        ->andReturn($socialiteUser)
+        ->getMock()
+        ->shouldReceive('adaptSociliteUserIntoAuthenticatable')
+        ->andReturn($genericUser);
 
     $guard = new TokenGuard($request);
 
