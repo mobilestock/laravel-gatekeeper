@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Auth\GenericUser;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
@@ -28,6 +30,8 @@ it('dispatches an event and redirects to the front-end with a user token and cus
     $socialiteUser = new User();
     $socialiteUser->token = 'test-token';
 
+    $genericUser = new GenericUser(get_object_vars($socialiteUser));
+
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
@@ -36,14 +40,17 @@ it('dispatches an event and redirects to the front-end with a user token and cus
         ->andReturnSelf()
         ->getMock()
         ->shouldReceive('user')
-        ->andReturn($socialiteUser);
+        ->andReturn($socialiteUser)
+        ->getMock()
+        ->shouldReceive('adaptSocialiteUserIntoAuthenticatable')
+        ->andReturn($genericUser);
 
     Event::fake();
 
     $response = $this->get('/oauth/callback?state=' . $state);
 
     Event::assertDispatched(function (UserAuthenticated $event) use ($socialiteUser, $result) {
-        return $event->user->token === $socialiteUser->token && $event->state === $result;
+        return Auth::user()->token === $socialiteUser->token && $event->state === $result;
     });
 
     $response->assertRedirect(

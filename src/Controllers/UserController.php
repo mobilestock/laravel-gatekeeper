@@ -3,11 +3,13 @@
 namespace MobileStock\Gatekeeper\Controllers;
 
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\Support\Facades\Request;
+use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 
@@ -34,13 +36,18 @@ class UserController extends Controller
 
         $user = Socialite::driver('users')->stateless()->user();
 
-        Event::dispatch(new UserAuthenticated($user, $state));
+        $genericUser = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($user);
+        Auth::setUser($genericUser);
+
+        Event::dispatch(new UserAuthenticated($state));
 
         /**
          * @issue https://github.com/mobilestock/backend/issues/638
          */
         return Redirect::to(
-            Config::get('app.front_url') . 'auth?' . http_build_query([self::REDIRECT_PARAM => $user->token])
+            Str::finish(Config::get('app.front_url'), '/') .
+                'auth?' .
+                http_build_query([self::REDIRECT_PARAM => $user->token])
         );
     }
 
