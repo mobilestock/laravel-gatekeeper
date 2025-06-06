@@ -45,7 +45,7 @@ it('retrieves user by access token with the correct data', function () {
         ->with('test-access-token')
         ->andReturn($socialiteUser)
         ->getMock()
-        ->shouldReceive('adaptSociliteUserIntoAuthenticatable')
+        ->shouldReceive('adaptSocialiteUserIntoAuthenticatable')
         ->andReturn($genericUser);
 
     $guard = new TokenGuard($request);

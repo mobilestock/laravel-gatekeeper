@@ -42,7 +42,7 @@ it('dispatches an event and redirects to the front-end with a user token and cus
         ->shouldReceive('user')
         ->andReturn($socialiteUser)
         ->getMock()
-        ->shouldReceive('adaptSociliteUserIntoAuthenticatable')
+        ->shouldReceive('adaptSocialiteUserIntoAuthenticatable')
         ->andReturn($genericUser);
 
     Event::fake();

@@ -36,7 +36,7 @@ class UserController extends Controller
 
         $user = Socialite::driver('users')->stateless()->user();
 
-        $genericUser = Socialite::driver('users')->adaptSociliteUserIntoAuthenticatable($user);
+        $genericUser = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($user);
         Auth::setUser($genericUser);
 
         Event::dispatch(new UserAuthenticated($state));

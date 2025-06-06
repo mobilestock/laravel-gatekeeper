@@ -87,7 +87,7 @@ it('adapts socialite user to a authenticatable class', function () {
     $socialiteUser->id = 12;
     $socialiteUser->name = 'Test Establishment';
 
-    $authUser = $provider->adaptSociliteUserIntoAuthenticatable($socialiteUser);
+    $authUser = $provider->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
 
     expect($authUser)->toBeInstanceOf(Authenticatable::class);
     expect($authUser->id)->toBe($socialiteUser->id);
