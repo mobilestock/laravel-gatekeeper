@@ -5,8 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Event;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\User;
 use MobileStock\Gatekeeper\Controllers\UserController;
-use MobileStock\Gatekeeper\Socialite\User;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 use Symfony\Component\HttpFoundation\Response;
 

@@ -5,7 +5,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Psr7\Response;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Config;
-use MobileStock\Gatekeeper\Socialite\User;
+use Laravel\Socialite\Two\User;
 
 it('builds the correct authorization URL', function () {
     $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');
@@ -84,12 +84,11 @@ it('adapts socialite user to a authenticatable class', function () {
     $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');
 
     $socialiteUser = new User();
-    $socialiteUser->id = 12;
-    $socialiteUser->name = 'Test Establishment';
+    $socialiteUser->attributes = ['id' => 12, 'name' => 'Test Establishment'];
 
     $authUser = $provider->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
 
     expect($authUser)->toBeInstanceOf(Authenticatable::class);
-    expect($authUser->id)->toBe($socialiteUser->id);
-    expect($authUser->name)->toBe($socialiteUser->name);
+    expect($authUser->id)->toBe($socialiteUser->attributes['id']);
+    expect($authUser->name)->toBe($socialiteUser->attributes['name']);
 });

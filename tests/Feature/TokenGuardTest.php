@@ -4,8 +4,8 @@ use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Two\User;
 use MobileStock\Gatekeeper\Providers\GatekeeperServiceProvider;
-use MobileStock\Gatekeeper\Socialite\User;
 use MobileStock\Gatekeeper\TokenGuard;
 
 it('registers the token_users guard', function () {

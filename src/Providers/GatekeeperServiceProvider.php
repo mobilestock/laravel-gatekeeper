@@ -2,13 +2,13 @@
 
 namespace MobileStock\Gatekeeper\Providers;
 
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;
-use MobileStock\Gatekeeper\Socialite\User;
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use MobileStock\Gatekeeper\TokenGuard;
 
@@ -29,7 +29,7 @@ class GatekeeperServiceProvider extends ServiceProvider
         Config::set('services.users.front_url', Config::get('gatekeeper.users_front_url'));
         Config::set('services.users.api_url', Config::get('gatekeeper.users_api_url'));
 
-        Gate::define('admin', function (User $user) {
+        Gate::define('admin', function (Authenticatable $user) {
             return $user->is_admin;
         });
     }
