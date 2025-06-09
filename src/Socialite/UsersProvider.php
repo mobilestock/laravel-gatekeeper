@@ -7,7 +7,7 @@ use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Two\AbstractProvider;
-use Laravel\Socialite\Two\User as SocialiteUser;
+use Laravel\Socialite\Two\User;
 
 class UsersProvider extends AbstractProvider
 {
@@ -35,9 +35,9 @@ class UsersProvider extends AbstractProvider
         return (new User())->setRaw($user)->map($user);
     }
 
-    public function adaptSocialiteUserIntoAuthenticatable(SocialiteUser $user): Authenticatable
+    public function adaptSocialiteUserIntoAuthenticatable(User $user): Authenticatable
     {
-        $genericUser = new GenericUser(get_object_vars($user));
+        $genericUser = new GenericUser($user->attributes);
 
         return $genericUser;
     }
