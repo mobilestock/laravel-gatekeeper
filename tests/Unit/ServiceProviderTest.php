@@ -1,6 +1,6 @@
 <?php
 
-use MobileStock\Gatekeeper\Socialite\User;
+use Illuminate\Auth\GenericUser;
 
 dataset('admin gate', [
     'user is admin' => [true],
@@ -8,8 +8,7 @@ dataset('admin gate', [
 ]);
 
 it('checks if user is admin with gate', function (bool $isAdmin) {
-    $user = new User();
-    $user->is_admin = $isAdmin;
+    $user = new GenericUser(['is_admin' => $isAdmin]);
 
     $result = Gate::forUser($user)->allows('admin', $user);
 
