@@ -15,6 +15,9 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
         $this->storageKey = $storageKey;
     }
 
+    /**
+     * @issue https://github.com/mobilestock/backend/issues/1006
+     */
     public function user()
     {
         if (!is_null($this->user)) {
