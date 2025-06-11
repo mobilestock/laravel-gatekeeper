@@ -15,6 +15,9 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
         $this->storageKey = $storageKey;
     }
 
+    /**
+     * @issue https://github.com/mobilestock/backend/issues/1006
+     */
     public function user()
     {
         if (!is_null($this->user)) {
@@ -26,7 +29,8 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
         $accessToken = $this->request->bearerToken();
 
         try {
-            $user = Socialite::driver('users')->userFromToken($accessToken);
+            $sociliteUser = Socialite::driver('users')->userFromToken($accessToken);
+            $user = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($sociliteUser);
         } catch (\Throwable) {
         }
 
