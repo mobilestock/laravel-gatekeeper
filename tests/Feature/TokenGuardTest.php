@@ -187,3 +187,40 @@ it('retrieves user by access token without a provider', function () {
         ->and($user->name)
         ->toBe('Test User');
 });
+
+it('should return an empty user if provider sent and no user found', function () {
+    $request = Request::create(
+        '/api/protected-route',
+        'GET',
+        server: [
+            'HTTP_AUTHORIZATION' => 'Bearer test-access-token',
+        ]
+    );
+
+    /** @var Mockery\MockInterface|UserProvider $provider */
+    $provider = Mockery::mock(UserProvider::class);
+    $provider->shouldReceive('retrieveByCredentials')->andReturn(null);
+
+    $socialiteUser = new User();
+    $socialiteUser->id = 12;
+    $socialiteUser->user = ['id' => 12, 'name' => 'Test Establishment'];
+
+    $authenticatableUser = new AuthenticatableUser(get_object_vars($socialiteUser));
+
+    Socialite::shouldReceive('driver')
+        ->with('users')
+        ->andReturnSelf()
+        ->getMock()
+        ->shouldReceive('userFromToken')
+        ->with('test-access-token')
+        ->andReturn($socialiteUser)
+        ->getMock()
+        ->shouldReceive('adaptSocialiteUserIntoAuthenticatable')
+        ->andReturn($authenticatableUser);
+
+    $tokenGuard = new TokenGuard($provider, $request);
+
+    $user = $tokenGuard->user();
+
+    expect($user)->toBeNull();
+});
