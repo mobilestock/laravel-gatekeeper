@@ -3,9 +3,9 @@
 namespace MobileStock\Gatekeeper\Users;
 
 use Illuminate\Auth\GenericUser;
-use MobileStock\Gatekeeper\Contracts\UserDetails;
+use MobileStock\Gatekeeper\Contracts\User;
 
-class AuthenticatableUser extends GenericUser implements UserDetails
+class AuthenticatableUser extends GenericUser implements User
 {
     public function userInfo(): array
     {

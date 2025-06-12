@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;
-use MobileStock\Gatekeeper\Contracts\UserDetails;
+use MobileStock\Gatekeeper\Contracts\User;
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use MobileStock\Gatekeeper\TokenGuard;
 
@@ -29,7 +29,7 @@ class GatekeeperServiceProvider extends ServiceProvider
         Config::set('services.users.front_url', Config::get('gatekeeper.users_front_url'));
         Config::set('services.users.api_url', Config::get('gatekeeper.users_api_url'));
 
-        Gate::define('admin', function (UserDetails $user) {
+        Gate::define('admin', function (User $user) {
             $userInfo = $user->userInfo();
             return $userInfo['is_admin'];
         });
