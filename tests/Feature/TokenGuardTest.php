@@ -1,12 +1,13 @@
 <?php
 
-use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User;
 use MobileStock\Gatekeeper\Providers\GatekeeperServiceProvider;
 use MobileStock\Gatekeeper\TokenGuard;
+use MobileStock\Gatekeeper\Users\AuthenticatableUser;
 
 it('registers the token_users guard', function () {
     Config::set('auth.guards.token_users', [
@@ -31,11 +32,18 @@ it('retrieves user by access token with the correct data', function () {
         ]
     );
 
+    /** @var Mockery\MockInterface|UserProvider $provider */
+    $provider = Mockery::mock(UserProvider::class);
+    $provider
+        ->shouldReceive('retrieveByCredentials')
+        ->with(['id' => 12])
+        ->andReturn((object) ['id' => 12, 'fees' => [1, 2, 3]]);
+
     $socialiteUser = new User();
     $socialiteUser->id = 12;
-    $socialiteUser->name = 'Test Establishment';
+    $socialiteUser->user = ['id' => 12, 'name' => 'Test Establishment'];
 
-    $genericUser = new GenericUser(get_object_vars($socialiteUser));
+    $authenticatableUser = new AuthenticatableUser(get_object_vars($socialiteUser));
 
     Socialite::shouldReceive('driver')
         ->with('users')
@@ -46,9 +54,9 @@ it('retrieves user by access token with the correct data', function () {
         ->andReturn($socialiteUser)
         ->getMock()
         ->shouldReceive('adaptSocialiteUserIntoAuthenticatable')
-        ->andReturn($genericUser);
+        ->andReturn($authenticatableUser);
 
-    $guard = new TokenGuard($request);
+    $guard = new TokenGuard($provider, $request);
 
     $user = $guard->user();
 
@@ -56,8 +64,10 @@ it('retrieves user by access token with the correct data', function () {
         ->toBeObject()
         ->and($user->id)
         ->toBe(12)
-        ->and($user->name)
-        ->toBe('Test Establishment');
+        ->and($user->userInfo['name'])
+        ->toBe('Test Establishment')
+        ->and($user->fees)
+        ->toBe([1, 2, 3]);
 });
 
 it('returns the user if it is already set', function () {
