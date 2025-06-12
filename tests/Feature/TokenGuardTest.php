@@ -62,12 +62,18 @@ it('retrieves user by access token with the correct data', function () {
         ]
     );
 
+    $classMock = new class (12, [1, 2, 3]) extends stdClass {
+        public function __construct(public int $id, public array $fees)
+        {
+        }
+    };
+
     /** @var Mockery\MockInterface|UserProvider $provider */
     $provider = Mockery::mock(UserProvider::class);
     $provider
         ->shouldReceive('retrieveByCredentials')
         ->with(['id' => 12])
-        ->andReturn((object) ['id' => 12, 'fees' => [1, 2, 3]]);
+        ->andReturn($classMock);
 
     $socialiteUser = new User();
     $socialiteUser->id = 12;
@@ -92,6 +98,8 @@ it('retrieves user by access token with the correct data', function () {
 
     expect($user)
         ->toBeObject()
+        ->and($user)
+        ->toBeInstanceOf(get_class($classMock))
         ->and($user->id)
         ->toBe(12)
         ->and($user->userInfo['name'])
@@ -197,6 +205,8 @@ it('retrieves user by access token without a provider', function () {
 
     expect($user)
         ->toBeObject()
+        ->and($user)
+        ->toBeInstanceOf(AuthenticatableUser::class)
         ->and($user->id)
         ->toBe(12)
         ->and($user->name)
