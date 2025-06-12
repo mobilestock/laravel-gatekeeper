@@ -1,8 +1,10 @@
 <?php
 
+namespace MobileStock\Gatekeeper\Contracts;
+
 use Illuminate\Contracts\Auth\Authenticatable;
 
-interface UserInfo extends Authenticatable
+interface UserDetails extends Authenticatable
 {
     public function userInfo(): array;
 }
