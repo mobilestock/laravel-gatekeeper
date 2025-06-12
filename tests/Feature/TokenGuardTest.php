@@ -3,17 +3,32 @@
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\UserProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Socialite\Facades\Socialite;
 use Laravel\Socialite\Two\User;
 use MobileStock\Gatekeeper\Providers\GatekeeperServiceProvider;
 use MobileStock\Gatekeeper\TokenGuard;
 use MobileStock\Gatekeeper\Users\AuthenticatableUser;
 
-it('registers the token_users guard', function () {
+it('registers the token_users guard and calls createUserProvider', function () {
     Config::set('auth.guards.token_users', [
         'driver' => 'token_users',
         'provider' => 'users',
     ]);
+
+    $mockProvider = Mockery::mock(UserProvider::class);
+
+    $authMock = Mockery::mock(Auth::getFacadeRoot())
+        ->shouldReceive('createUserProvider')
+        ->once()
+        ->with('users')
+        ->andReturn($mockProvider)
+        ->getMock()
+        ->shouldReceive('extend')
+        ->once()
+        ->getMock();
+
+    Auth::swap($authMock);
 
     $provider = new GatekeeperServiceProvider($this->app);
 
