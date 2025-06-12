@@ -1,5 +1,7 @@
 <?php
 
+namespace MobileStock\Gatekeeper\Users;
+
 use Illuminate\Auth\GenericUser;
 use MobileStock\Gatekeeper\Contracts\UserDetails;
 
