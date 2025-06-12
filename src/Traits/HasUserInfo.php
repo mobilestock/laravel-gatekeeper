@@ -4,7 +4,7 @@ namespace MobileStock\Gatekeeper\Traits;
 
 trait HasUserInfo
 {
-    public function userInfo()
+    public function userInfo(): array
     {
         return $this->userInfo;
     }
