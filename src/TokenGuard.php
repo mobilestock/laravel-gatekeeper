@@ -4,6 +4,7 @@ namespace MobileStock\Gatekeeper;
 
 use Illuminate\Contracts\Auth\UserProvider as AuthUserProvider;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Laravel\Socialite\Facades\Socialite;
 
 class TokenGuard extends \Illuminate\Auth\TokenGuard
@@ -39,6 +40,17 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
             $sociliteUser = Socialite::driver('users')->userFromToken($accessToken);
             $user = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($sociliteUser);
         } catch (\Throwable) {
+        }
+
+        if (!empty($sociliteUser) && !empty($this->provider)) {
+            $entity = $this->provider->retrieveByCredentials([
+                $this->storageKey => $sociliteUser->id,
+            ]);
+
+            if (!empty($entity)) {
+                $entity->userInfo = Arr::except($sociliteUser->user, 'id');
+                $user = $entity;
+            }
         }
 
         return $this->user = $user;
