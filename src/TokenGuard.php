@@ -47,10 +47,12 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
                 $this->storageKey => $socialiteUser->id,
             ]);
 
-            if (!empty($entity)) {
-                $entity->userInfo = Arr::except($socialiteUser->user, 'id');
-                $user = $entity;
+            if (empty($entity)) {
+                return $this->user = null;
             }
+
+            $entity->userInfo = Arr::except($socialiteUser->user, 'id');
+            $user = $entity;
         }
 
         return $this->user = $user;
