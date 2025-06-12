@@ -98,6 +98,9 @@ it('returns a null user if an invalid token is sent', function () {
         ]
     );
 
+    /** @var UserProvider $provider */
+    $provider = Mockery::mock(UserProvider::class);
+
     Socialite::shouldReceive('driver')
         ->with('users')
         ->andReturnSelf()
@@ -105,7 +108,7 @@ it('returns a null user if an invalid token is sent', function () {
         ->shouldReceive('userFromToken')
         ->andThrow(new Exception('Invalid token'));
 
-    $tokenGuard = new TokenGuard($request);
+    $tokenGuard = new TokenGuard($provider, $request);
 
     $user = $tokenGuard->user();
 
