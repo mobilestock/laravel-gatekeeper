@@ -37,18 +37,18 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
         $accessToken = $this->request->bearerToken();
 
         try {
-            $sociliteUser = Socialite::driver('users')->userFromToken($accessToken);
-            $user = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($sociliteUser);
+            $socialiteUser = Socialite::driver('users')->userFromToken($accessToken);
+            $user = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
         } catch (\Throwable) {
         }
 
-        if (!empty($sociliteUser) && !empty($this->provider)) {
+        if (!empty($socialiteUser) && !empty($this->provider)) {
             $entity = $this->provider->retrieveByCredentials([
-                $this->storageKey => $sociliteUser->id,
+                $this->storageKey => $socialiteUser->id,
             ]);
 
             if (!empty($entity)) {
-                $entity->userInfo = Arr::except($sociliteUser->user, 'id');
+                $entity->userInfo = Arr::except($socialiteUser->user, 'id');
                 $user = $entity;
             }
         }
