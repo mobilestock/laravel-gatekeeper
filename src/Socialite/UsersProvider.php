@@ -3,11 +3,11 @@
 namespace MobileStock\Gatekeeper\Socialite;
 
 use GuzzleHttp\RequestOptions;
-use Illuminate\Auth\GenericUser;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User;
+use MobileStock\Gatekeeper\Users\AuthenticatableUser;
 
 class UsersProvider extends AbstractProvider
 {
@@ -37,7 +37,7 @@ class UsersProvider extends AbstractProvider
 
     public function adaptSocialiteUserIntoAuthenticatable(User $user): Authenticatable
     {
-        $genericUser = new GenericUser($user->attributes);
+        $genericUser = new AuthenticatableUser($user->attributes);
 
         return $genericUser;
     }
