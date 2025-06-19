@@ -40,10 +40,9 @@ it('registers the token_users guard and calls createUserProvider', function () {
     expect($guard)->toBeInstanceOf(TokenGuard::class);
 });
 
-it('registers the token_users guard without auth provider', function () {
+it('registers the token_users guard without auth provider and storage_key', function () {
     Config::set('auth.guards.token_users', [
         'driver' => 'token_users',
-        'storage_key' => 'id',
     ]);
 
     $provider = new GatekeeperServiceProvider($this->app);
