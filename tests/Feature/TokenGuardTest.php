@@ -14,6 +14,7 @@ it('registers the token_users guard and calls createUserProvider', function () {
     Config::set('auth.guards.token_users', [
         'driver' => 'token_users',
         'provider' => 'users',
+        'storage_key' => 'id',
     ]);
 
     $mockProvider = Mockery::mock(UserProvider::class);
@@ -42,6 +43,7 @@ it('registers the token_users guard and calls createUserProvider', function () {
 it('registers the token_users guard without auth provider', function () {
     Config::set('auth.guards.token_users', [
         'driver' => 'token_users',
+        'storage_key' => 'id',
     ]);
 
     $provider = new GatekeeperServiceProvider($this->app);

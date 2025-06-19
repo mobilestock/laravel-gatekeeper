@@ -47,7 +47,7 @@ class GatekeeperServiceProvider extends ServiceProvider
                 $provider = Auth::createUserProvider($config['provider']);
             }
 
-            return new TokenGuard($provider ?? null, Request::instance());
+            return new TokenGuard($provider ?? null, Request::instance(), $config['storage_key']);
         });
     }
 }
