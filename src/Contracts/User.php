@@ -8,3 +8,4 @@ interface User extends Authenticatable
 {
     public function userInfo(): array;
 }
+# COMENTÁRIO DE TESTE PARA CI/CD
