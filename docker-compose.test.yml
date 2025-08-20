@@ -1,0 +1,8 @@
+services:
+  laravel-gatekeeper:
+    extends:
+      file: docker-compose.base.yml
+      service: pest-base
+    volumes:
+      - './packages/laravel-gatekeeper:/laravel-gatekeeper'
+    working_dir: /laravel-gatekeeper
