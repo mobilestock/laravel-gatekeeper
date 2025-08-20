@@ -1,1 +1,2 @@
 tests export-ignore
+docker-compose.test.yml export-ignore
