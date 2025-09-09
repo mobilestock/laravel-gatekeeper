@@ -105,6 +105,8 @@ it('retrieves user by access token with the correct data', function () {
         ->toBe(12)
         ->and($user->userInfo['name'])
         ->toBe('Test Establishment')
+        ->and($user->userInfo['id'])
+        ->toBe(12)
         ->and($user->fees)
         ->toBe([1, 2, 3]);
 });
