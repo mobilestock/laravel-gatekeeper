@@ -20,3 +20,12 @@ it('returns the correct user info', function () {
 
     expect($class->userInfo())->toBe($expected);
 });
+
+it('should return the correct auth identifier', function () {
+    $class = new class {
+        use HasUserInfo;
+        public array $userInfo = ['id' => 69];
+    };
+
+    expect($class->getAuthIdentifier())->toBe(69);
+});
