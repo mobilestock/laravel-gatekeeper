@@ -11,16 +11,4 @@ class AuthenticatableUser extends GenericUser implements User
     {
         return $this->attributes;
     }
-
-    /**
-     * Get the unique identifier for the user.
-     *
-     * @return mixed
-     */
-    public function getAuthIdentifier()
-    {
-        $user = $this->userInfo();
-
-        return $user['id'];
-    }
 }
