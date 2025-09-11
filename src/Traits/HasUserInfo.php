@@ -9,7 +9,7 @@ trait HasUserInfo
         return $this->userInfo;
     }
 
-    public function getAuthIdentifier(): mixed
+    public function getAuthIdentifier(): int
     {
         $user = $this->userInfo();
 
