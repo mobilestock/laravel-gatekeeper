@@ -3,50 +3,58 @@
 namespace MobileStock\Gatekeeper\Middleware;
 
 use Closure;
+use Illuminate\Auth\GenericUser;
+use Illuminate\Auth\Middleware\Authenticate;
+use Illuminate\Contracts\Auth\Factory;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Http;
+use Laravel\Passport\Client;
 use Laravel\Passport\Exceptions\AuthenticationException;
-use Laravel\Passport\Http\Middleware\CheckClientCredentials;
-use Laravel\Passport\Token;
+use Laravel\Passport\TokenRepository;
+use Laravel\Socialite\Facades\Socialite;
 use League\OAuth2\Server\Exception\OAuthServerException;
+use League\OAuth2\Server\ResourceServer;
 use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Auth\AuthenticationException as IlluminateAuthenticationException;
 
-class CheckScopesOrAuthorize extends CheckClientCredentials
+class CheckScopesOrAuthorize
 {
     /**
-     * Formato esperado dos parâmetros:
+     * The Resource Server instance.
      *
-     * check_scopes_or_authorize:scopes=access|verified,abilities=APPROVED_SUPPLIER|CHECK_REPORTS
-     *
-     * - "scopes": lista de escopos do Passport separados por "|"
-     * - "abilities": lista de permissions/abilities separados por "|"
-     *
-     * Se pelo menos UMA das listas validar, a requisição é liberada.
+     * @var \League\OAuth2\Server\ResourceServer
      */
-    public function handle($request, Closure $next, ...$rawMiddlewareParameters): Response
+    protected $server;
+
+    /**
+     * Token Repository.
+     *
+     * @var \Laravel\Passport\TokenRepository
+     */
+    protected $repository;
+
+    /**
+     * Create a new middleware instance.
+     *
+     * @param  \League\OAuth2\Server\ResourceServer  $server
+     * @param  \Laravel\Passport\TokenRepository  $repository
+     * @return void
+     */
+    public function __construct(ResourceServer $server, TokenRepository $repository)
     {
-        $rules = ['abilities' => [], 'scopes' => ['*']];
+        $this->server = $server;
+        $this->repository = $repository;
+    }
 
-        foreach ($rawMiddlewareParameters as $rawParameter) {
-            [$parameterKey, $parameterValue] = explode('=', $rawParameter, 2);
-            if (empty($parameterKey) || empty($parameterValue)) {
-                continue;
-            }
-
-            $rules[$parameterKey] = explode('|', $parameterValue);
-            $rules[$parameterKey] = array_filter($rules[$parameterKey]);
-        }
-
-        $authenticatedUser = Auth::user();
-        // $authenticatedUserToken = $authenticatedUser?->token();
-
-        $userValidatedAtLeastOneAbility = $this->userValidatedAnyRequiredAbility(
-            $authenticatedUser,
-            $rules['abilities']
-        );
-        if ($userValidatedAtLeastOneAbility) {
-            return $next($request);
+    public function handle(Request $request, Closure $next, ...$rawMiddlewareParameters): Response
+    {
+        $accessToken = $request->bearerToken();
+        if (!$accessToken) {
+            throw new AuthenticationException();
         }
 
         $psrFactory = new PsrHttpFactory();
@@ -57,55 +65,16 @@ class CheckScopesOrAuthorize extends CheckClientCredentials
             throw new AuthenticationException();
         }
 
-        $this->validate($psr, $rules['scopes']);
-
-        $accessTokenId = $psr->getAttribute('oauth_access_token_id');
-        $accessToken = $this->repository->find($accessTokenId);
-        if (empty($accessToken->user_id)) {
-            throw new AuthenticationException('No user linked to this system');
+        // TODO: Olhar o getValidToken ou o tokenGuard do Passport
+        $clientId = $psr->getAttribute('oauth_client_id');
+        $client = Client::find($clientId);
+        if (empty($client->redirect) && !empty($client->user_id)) {
+            $driver = Socialite::driver('users');
+            $socialiteUser = $driver->userFromToken($accessToken);
+            $user = $driver->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
+            Auth::setUser($user);
         }
-
-        // $user = $this->repository->forUser($accessToken->user_id);
-        // Auth::setUser($user);
 
         return $next($request);
-    }
-
-    /**
-     * Verifica se o token possui TODOS os escopos necessários.
-     *
-     * @param  ?Token  $authenticatedUserToken
-     * @param  array<int, string>  $requiredScopesList
-     */
-    protected function tokenValidatedAnyScopes(?Token $authenticatedUserToken, array $requiredScopesList): bool
-    {
-        if (empty($authenticatedUserToken)) {
-            return false;
-        }
-
-        foreach ($requiredScopesList as $requiredScopeName) {
-            if ($authenticatedUserToken->can($requiredScopeName)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Verifica se o usuário possui pelo menos UMA das abilities requeridas.
-     *
-     * @param  mixed  $authenticatedUser
-     * @param  array<int, string>  $requiredAbilitiesList
-     */
-    protected function userValidatedAnyRequiredAbility(mixed $authenticatedUser, array $requiredAbilitiesList): bool
-    {
-        if (empty($authenticatedUser)) {
-            return false;
-        }
-
-        $hasSomeAbility = Gate::any($requiredAbilitiesList);
-
-        return $hasSomeAbility;
     }
 }
