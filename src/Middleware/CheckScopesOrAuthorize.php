@@ -3,106 +3,86 @@
 namespace MobileStock\Gatekeeper\Middleware;
 
 use Closure;
-use Illuminate\Auth\GenericUser;
-use Illuminate\Auth\Middleware\Authenticate;
-use Illuminate\Contracts\Auth\Factory;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Http;
-use Laravel\Passport\Client;
-use Laravel\Passport\Exceptions\AuthenticationException;
-use Laravel\Passport\TokenRepository;
+use Illuminate\Support\Facades\Gate;
 use Laravel\Socialite\Facades\Socialite;
-use League\OAuth2\Server\Exception\OAuthServerException;
-use League\OAuth2\Server\ResourceServer;
-use Symfony\Bridge\PsrHttpMessage\Factory\PsrHttpFactory;
 use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Auth\AuthenticationException as IlluminateAuthenticationException;
 
 class CheckScopesOrAuthorize
 {
     /**
-     * The Resource Server instance.
-     *
-     * @var \League\OAuth2\Server\ResourceServer
-     */
-    protected $server;
-
-    /**
-     * Token Repository.
-     *
-     * @var \Laravel\Passport\TokenRepository
-     */
-    protected $repository;
-
-    /**
-     * Create a new middleware instance.
-     *
-     * @param  \League\OAuth2\Server\ResourceServer  $server
-     * @param  \Laravel\Passport\TokenRepository  $repository
-     * @return void
-     */
-    public function __construct(ResourceServer $server, TokenRepository $repository)
-    {
-        $this->server = $server;
-        $this->repository = $repository;
-    }
-
-    /**
      * Summary of handle
      * @param Request $request
      * @param Closure $next
-     * @param array{scopes:string,guards:string,abilities:string} $rawMiddlewareParameters
+     * @param array<string> $rawMiddlewareParameters
      * @throws AuthenticationException
      * @return Response
      */
     public function handle(Request $request, Closure $next, ...$rawMiddlewareParameters): Response
     {
         $accessToken = $request->bearerToken();
-        if (!$accessToken) {
+        if (empty($accessToken)) {
             throw new AuthenticationException();
         }
 
-        $rawMiddlewareParameters['scopes'] ??= implode('|', []);
-        $rawMiddlewareParameters['guards'] ??= implode('|', [null]);
-        $rawMiddlewareParameters['abilities'] ??= implode('|', []);
-        $configs = array_map(fn(string $key): array => explode('|', $rawMiddlewareParameters[$key]), [
-            'scopes',
-            'guards',
-            'abilities',
-        ]);
-
-        $psrFactory = new PsrHttpFactory();
-        $psr = $psrFactory->createRequest($request);
-        try {
-            $psr = $this->server->validateAuthenticatedRequest($psr);
-        } catch (OAuthServerException $e) {
-            throw new AuthenticationException();
+        $configs = ['scopes' => ['*'], 'guards' => [null], 'abilities' => []];
+        foreach ($rawMiddlewareParameters as $parameter) {
+            [$key, $values] = explode('=', $parameter);
+            $configs[$key] = explode('|', $values);
         }
+        $configs = Arr::only($configs, ['scopes', 'guards', 'abilities']);
 
-        $clientId = $psr->getAttribute('oauth_client_id');
-        $client = Client::find($clientId);
-        if (empty($client->redirect) && !empty($client->user_id)) {
-            $driver = Socialite::driver('users');
-            if (empty($driver)) {
-                $apiUrl = Config::get('services.users.api_url');
-                $users = Http::baseUrl($apiUrl)
-                    ->get('/api/user', ['ids' => [$client->user_id]])
-                    ->throw()
-                    ->json();
+        $driver = Socialite::driver('users');
+        $user = $driver->userFromToken($accessToken);
+        Auth::setUser($user);
 
-                $user = current($users);
-                $user = new GenericUser((array) $user);
-            } else {
-                $socialiteUser = $driver->userFromToken($accessToken);
-                $user = $driver->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
-            }
-
-            Auth::setUser($user);
-        }
+        $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
+        $this->ensureTokenHasRequiredGuard($configs['guards']);
+        $this->ensureTokenHasRequiredAbility($configs['abilities']);
 
         return $next($request);
+    }
+
+    protected function ensureTokenHasRequiredScopes(array $requiredScopes, array $userScopes): void
+    {
+        if (in_array('*', $requiredScopes)) {
+            return;
+        }
+
+        foreach ($requiredScopes as $scope) {
+            if (in_array($scope, $userScopes, true)) {
+                return;
+            }
+        }
+
+        throw new AuthenticationException();
+    }
+
+    protected function ensureTokenHasRequiredGuard(array $requiredGuards): void
+    {
+        foreach ($requiredGuards as $guard) {
+            $guardInstance = Auth::guard($guard);
+            if ($guardInstance->check()) {
+                Auth::shouldUse($guard);
+                return;
+            }
+        }
+
+        throw new AuthenticationException();
+    }
+
+    protected function ensureTokenHasRequiredAbility(array $requiredAbilities): void
+    {
+        if (empty($requiredAbilities)) {
+            return;
+        }
+        if (Gate::allows($requiredAbilities)) {
+            return;
+        }
+
+        throw new AuthenticationException();
     }
 }
