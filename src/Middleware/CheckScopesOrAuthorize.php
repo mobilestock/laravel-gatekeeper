@@ -4,6 +4,7 @@ namespace MobileStock\Gatekeeper\Middleware;
 
 use Closure;
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\GenericUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
@@ -37,7 +38,6 @@ class CheckScopesOrAuthorize
 
         $driver = Socialite::driver('users');
         $user = $driver->userFromToken($accessToken);
-        Auth::setUser($user);
 
         if ($user->is_client) {
             $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
@@ -45,6 +45,9 @@ class CheckScopesOrAuthorize
             $this->ensureTokenHasRequiredGuard($configs['guards']);
             $this->ensureTokenHasRequiredAbility($configs['abilities']);
         }
+
+        $user = new GenericUser((array) $user);
+        Auth::setUser($user);
 
         return $next($request);
     }
