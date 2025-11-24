@@ -1,12 +1,16 @@
 <?php
 
 use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Request;
+use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Middleware\CheckScopesOrAuthorize;
 
 beforeEach(function () {
     $this->middleware = new CheckScopesOrAuthorize();
+    $this->request = Request::create('/test_middleware');
 });
 
 it('should ensure token has required ability', function () {
@@ -71,3 +75,81 @@ it('should throw exception when the token does not have required scopes', functi
 
     invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredScopes', [$requiredScopes, $userScopes]);
 })->throws(AuthenticationException::class);
+
+it('should throw an exception when it does not have the bearer token', function () {
+    $this->middleware->handle($this->request, function () {});
+})->throws(AuthenticationException::class);
+
+it('should throw an exception when it does not have user to authenticate', function () {
+    $socialiteSpy = Socialite::spy();
+    $socialiteSpy->shouldReceive('driver')->andReturnSelf();
+    $socialiteSpy->shouldReceive('userFromToken')->andReturnNull();
+
+    $this->request->headers->set('Authorization', 'Bearer token_invalid_user');
+    $this->middleware->handle($this->request, function () {});
+})->throws(AuthenticationException::class);
+
+it('should execute next middleware when is a client with required scopes', function () {
+    $socialiteSpy = Socialite::spy();
+    $socialiteSpy->shouldReceive('driver')->andReturnSelf();
+    $socialiteSpy->shouldReceive('userFromToken')->andReturn((object) ['is_client' => true, 'scopes' => ['*']]);
+
+    $middlewareSpy = Mockery::spy(CheckScopesOrAuthorize::class)->makePartial();
+    $middlewareSpy->shouldAllowMockingProtectedMethods();
+    $middlewareSpy->shouldReceive('ensureTokenHasRequiredScopes');
+
+    $authSpy = Auth::spy()->makePartial();
+    $authSpy->shouldReceive('setUser');
+
+    $this->request->headers->set('Authorization', 'Bearer valid_token_to_client');
+    $next = $next = fn(mixed $_): Response => new Response('Called Next Middleware To Client');
+
+    $result = $middlewareSpy->handle($this->request, $next, 'scopes=read|write');
+
+    expect($result)->toBeInstanceOf(Response::class);
+    expect($result->getContent())->toBe('Called Next Middleware To Client');
+
+    $socialiteSpy->shouldHaveReceived('driver')->with('users')->once();
+    $socialiteSpy->shouldHaveReceived('userFromToken')->with('valid_token_to_client')->once();
+
+    $middlewareSpy
+        ->shouldHaveReceived('ensureTokenHasRequiredScopes')
+        ->with(['read', 'write'], ['*'])
+        ->once();
+    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredGuard');
+    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredAbility');
+});
+
+it('should execute next middleware when is a user with required guards and abilities', function () {
+    $socialiteSpy = Socialite::spy();
+    $socialiteSpy->shouldReceive('driver')->andReturnSelf();
+    $socialiteSpy->shouldReceive('userFromToken')->andReturn((object) ['is_client' => false, 'scopes' => ['*']]);
+
+    $middlewareSpy = Mockery::spy(CheckScopesOrAuthorize::class)->makePartial();
+    $middlewareSpy->shouldAllowMockingProtectedMethods();
+    $middlewareSpy->shouldReceive('ensureTokenHasRequiredGuard');
+    $middlewareSpy->shouldReceive('ensureTokenHasRequiredAbility');
+
+    $authSpy = Auth::spy()->makePartial();
+    $authSpy->shouldReceive('setUser');
+
+    $this->request->headers->set('Authorization', 'Bearer valid_token_to_user');
+    $next = $next = fn(mixed $_): Response => new Response('Called Next Middleware To User');
+
+    $result = $middlewareSpy->handle($this->request, $next, 'guards=admin|api|web', 'abilities=read|write');
+
+    expect($result)->toBeInstanceOf(Response::class);
+    expect($result->getContent())->toBe('Called Next Middleware To User');
+    $socialiteSpy->shouldHaveReceived('driver')->with('users')->once();
+    $socialiteSpy->shouldHaveReceived('userFromToken')->with('valid_token_to_user')->once();
+
+    $middlewareSpy
+        ->shouldHaveReceived('ensureTokenHasRequiredGuard')
+        ->with(['admin', 'api', 'web'])
+        ->once();
+    $middlewareSpy
+        ->shouldHaveReceived('ensureTokenHasRequiredAbility')
+        ->with(['read', 'write'])
+        ->once();
+    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredScopes');
+});
