@@ -39,9 +39,12 @@ class CheckScopesOrAuthorize
         $user = $driver->userFromToken($accessToken);
         Auth::setUser($user);
 
-        $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
-        $this->ensureTokenHasRequiredGuard($configs['guards']);
-        $this->ensureTokenHasRequiredAbility($configs['abilities']);
+        if ($user->is_client) {
+            $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
+        } else {
+            $this->ensureTokenHasRequiredGuard($configs['guards']);
+            $this->ensureTokenHasRequiredAbility($configs['abilities']);
+        }
 
         return $next($request);
     }
