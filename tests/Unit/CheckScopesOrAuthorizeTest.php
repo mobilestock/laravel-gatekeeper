@@ -26,3 +26,28 @@ it('should throw exception when token does not have required ability', function 
 
     invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredAbility', [$abilities]);
 })->throws(AuthenticationException::class);
+
+it('should ensure token has required guard', function () {
+    $guards = ['API', 'WEB'];
+    $authSpy = Auth::spy()->makePartial();
+    $authSpy->shouldReceive('guard')->andReturnSelf();
+    $authSpy->shouldReceive('check')->andReturnTrue();
+    $authSpy->shouldReceive('shouldUse');
+
+    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuard', [$guards]);
+
+    $authSpy->shouldHaveReceived('guard')->with('API')->once();
+    $authSpy->shouldHaveReceived('check')->once();
+    $authSpy->shouldHaveReceived('shouldUse')->with('API')->once();
+    $authSpy->shouldNotHaveReceived('guard', ['WEB']);
+    $authSpy->shouldNotHaveReceived('shouldUse', ['WEB']);
+});
+
+it('should throw exception when token does not have required guard', function () {
+    $guards = ['API', 'WEB'];
+    $authSpy = Auth::spy()->makePartial();
+    $authSpy->shouldReceive('guard')->andReturnSelf();
+    $authSpy->shouldReceive('check')->andReturnFalse();
+
+    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuard', [$guards]);
+})->throws(AuthenticationException::class);
