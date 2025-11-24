@@ -54,7 +54,7 @@ class CheckScopesOrAuthorize
 
     protected function ensureTokenHasRequiredScopes(array $requiredScopes, array $userScopes): void
     {
-        if (in_array('*', $requiredScopes)) {
+        if (in_array('*', $userScopes)) {
             return;
         }
 
