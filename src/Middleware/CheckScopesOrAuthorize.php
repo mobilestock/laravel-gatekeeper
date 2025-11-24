@@ -65,13 +65,24 @@ class CheckScopesOrAuthorize
             throw new AuthenticationException();
         }
 
-        // TODO: Olhar o getValidToken ou o tokenGuard do Passport
         $clientId = $psr->getAttribute('oauth_client_id');
         $client = Client::find($clientId);
         if (empty($client->redirect) && !empty($client->user_id)) {
             $driver = Socialite::driver('users');
-            $socialiteUser = $driver->userFromToken($accessToken);
-            $user = $driver->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
+            if (empty($driver)) {
+                $apiUrl = Config::get('services.users.api_url');
+                $users = Http::baseUrl($apiUrl)
+                    ->get('/api/user', ['ids' => [$client->user_id]])
+                    ->throw()
+                    ->json();
+
+                $user = current($users);
+                $user = new GenericUser((array) $user);
+            } else {
+                $socialiteUser = $driver->userFromToken($accessToken);
+                $user = $driver->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
+            }
+
             Auth::setUser($user);
         }
 
