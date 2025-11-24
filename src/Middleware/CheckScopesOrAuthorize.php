@@ -45,8 +45,8 @@ class CheckScopesOrAuthorize
         if ($user->is_client) {
             $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
         } else {
-            $this->ensureTokenHasRequiredGuard($configs['guards']);
-            $this->ensureTokenHasRequiredAbility($configs['abilities']);
+            $this->ensureTokenHasRequiredGuards($configs['guards']);
+            $this->ensureTokenHasRequiredAbilities($configs['abilities']);
         }
 
         $user = new GenericUser((array) $user);
@@ -70,7 +70,7 @@ class CheckScopesOrAuthorize
         throw new AuthenticationException();
     }
 
-    protected function ensureTokenHasRequiredGuard(array $requiredGuards): void
+    protected function ensureTokenHasRequiredGuards(array $requiredGuards): void
     {
         foreach ($requiredGuards as $guard) {
             $guardInstance = Auth::guard($guard);
@@ -83,7 +83,7 @@ class CheckScopesOrAuthorize
         throw new AuthenticationException();
     }
 
-    protected function ensureTokenHasRequiredAbility(array $requiredAbilities): void
+    protected function ensureTokenHasRequiredAbilities(array $requiredAbilities): void
     {
         if (Gate::allows($requiredAbilities)) {
             return;

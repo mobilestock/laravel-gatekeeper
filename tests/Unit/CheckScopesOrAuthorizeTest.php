@@ -18,7 +18,7 @@ it('should ensure token has required ability', function () {
     $gateSpy = Gate::spy();
     $gateSpy->shouldReceive('allows')->andReturnTrue();
 
-    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredAbility', [$abilities]);
+    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredAbilities', [$abilities]);
 
     $gateSpy->shouldHaveReceived('allows')->with($abilities)->once();
 });
@@ -28,7 +28,7 @@ it('should throw exception when token does not have required ability', function 
     $gateSpy = Gate::spy();
     $gateSpy->shouldReceive('allows')->andReturnFalse();
 
-    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredAbility', [$abilities]);
+    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredAbilities', [$abilities]);
 })->throws(AuthenticationException::class);
 
 it('should ensure token has required guard', function () {
@@ -38,7 +38,7 @@ it('should ensure token has required guard', function () {
     $authSpy->shouldReceive('check')->andReturnTrue();
     $authSpy->shouldReceive('shouldUse');
 
-    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuard', [$guards]);
+    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuards', [$guards]);
 
     $authSpy->shouldHaveReceived('guard')->with('API')->once();
     $authSpy->shouldHaveReceived('check')->once();
@@ -53,7 +53,7 @@ it('should throw exception when token does not have required guard', function ()
     $authSpy->shouldReceive('guard')->andReturnSelf();
     $authSpy->shouldReceive('check')->andReturnFalse();
 
-    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuard', [$guards]);
+    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuards', [$guards]);
 })->throws(AuthenticationException::class);
 
 dataset('userScopesProvider', [
@@ -116,8 +116,8 @@ it('should execute next middleware when is a client with required scopes', funct
         ->shouldHaveReceived('ensureTokenHasRequiredScopes')
         ->with(['read', 'write'], ['*'])
         ->once();
-    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredGuard');
-    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredAbility');
+    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredGuards');
+    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredAbilities');
 });
 
 it('should execute next middleware when is a user with required guards and abilities', function () {
@@ -127,8 +127,8 @@ it('should execute next middleware when is a user with required guards and abili
 
     $middlewareSpy = Mockery::spy(CheckScopesOrAuthorize::class)->makePartial();
     $middlewareSpy->shouldAllowMockingProtectedMethods();
-    $middlewareSpy->shouldReceive('ensureTokenHasRequiredGuard');
-    $middlewareSpy->shouldReceive('ensureTokenHasRequiredAbility');
+    $middlewareSpy->shouldReceive('ensureTokenHasRequiredGuards');
+    $middlewareSpy->shouldReceive('ensureTokenHasRequiredAbilities');
 
     $authSpy = Auth::spy()->makePartial();
     $authSpy->shouldReceive('setUser');
@@ -144,11 +144,11 @@ it('should execute next middleware when is a user with required guards and abili
     $socialiteSpy->shouldHaveReceived('userFromToken')->with('valid_token_to_user')->once();
 
     $middlewareSpy
-        ->shouldHaveReceived('ensureTokenHasRequiredGuard')
+        ->shouldHaveReceived('ensureTokenHasRequiredGuards')
         ->with(['admin', 'api', 'web'])
         ->once();
     $middlewareSpy
-        ->shouldHaveReceived('ensureTokenHasRequiredAbility')
+        ->shouldHaveReceived('ensureTokenHasRequiredAbilities')
         ->with(['read', 'write'])
         ->once();
     $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredScopes');
