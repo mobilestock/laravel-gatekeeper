@@ -50,12 +50,29 @@ class CheckScopesOrAuthorize
         $this->repository = $repository;
     }
 
+    /**
+     * Summary of handle
+     * @param Request $request
+     * @param Closure $next
+     * @param array{scopes:string,guards:string,abilities:string} $rawMiddlewareParameters
+     * @throws AuthenticationException
+     * @return Response
+     */
     public function handle(Request $request, Closure $next, ...$rawMiddlewareParameters): Response
     {
         $accessToken = $request->bearerToken();
         if (!$accessToken) {
             throw new AuthenticationException();
         }
+
+        $rawMiddlewareParameters['scopes'] ??= implode('|', []);
+        $rawMiddlewareParameters['guards'] ??= implode('|', [null]);
+        $rawMiddlewareParameters['abilities'] ??= implode('|', []);
+        $configs = array_map(fn(string $key): array => explode('|', $rawMiddlewareParameters[$key]), [
+            'scopes',
+            'guards',
+            'abilities',
+        ]);
 
         $psrFactory = new PsrHttpFactory();
         $psr = $psrFactory->createRequest($request);
