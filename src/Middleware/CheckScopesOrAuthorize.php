@@ -38,6 +38,9 @@ class CheckScopesOrAuthorize
 
         $driver = Socialite::driver('users');
         $user = $driver->userFromToken($accessToken);
+        if (empty($user)) {
+            throw new AuthenticationException();
+        }
 
         if ($user->is_client) {
             $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
