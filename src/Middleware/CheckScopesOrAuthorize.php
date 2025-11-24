@@ -15,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 class CheckScopesOrAuthorize
 {
     /**
-     * Summary of handle
      * @param Request $request
      * @param Closure $next
      * @param array<string> $rawMiddlewareParameters
