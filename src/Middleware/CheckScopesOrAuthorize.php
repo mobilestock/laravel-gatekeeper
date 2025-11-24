@@ -82,9 +82,6 @@ class CheckScopesOrAuthorize
 
     protected function ensureTokenHasRequiredAbility(array $requiredAbilities): void
     {
-        if (empty($requiredAbilities)) {
-            return;
-        }
         if (Gate::allows($requiredAbilities)) {
             return;
         }
