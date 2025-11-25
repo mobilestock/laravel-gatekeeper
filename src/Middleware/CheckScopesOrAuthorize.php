@@ -52,7 +52,7 @@ class CheckScopesOrAuthorize extends UserBaseMiddleware
 
     protected function ensureTokenHasRequiredAbilities(array $requiredAbilities): void
     {
-        if (Gate::any($requiredAbilities)) {
+        if (empty($requiredAbilities) || Gate::any($requiredAbilities)) {
             return;
         }
 
