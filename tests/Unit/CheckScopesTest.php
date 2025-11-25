@@ -5,6 +5,13 @@ use Illuminate\Http\Response;
 use MobileStock\Gatekeeper\Middleware\CheckScopes;
 use Symfony\Component\HttpKernel\Exception\UnauthorizedHttpException;
 
+it('should early return when user has wildcard scope', function () {
+    $userScopes = ['*'];
+    $requiredScopes = ['scope1', 'scope2'];
+
+    invokeProtectedMethod(new CheckScopes(), 'ensureTokenHasRequiredScopes', [$requiredScopes, $userScopes]);
+})->throwsNoExceptions();
+
 it('should throw exception when a required scope is missing', function () {
     $userScopes = ['scope1'];
     $requiredScopes = ['scope1', 'scope2'];

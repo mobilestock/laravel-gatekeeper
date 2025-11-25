@@ -23,6 +23,10 @@ class CheckScopes extends UserBaseMiddleware
 
     protected function ensureTokenHasRequiredScopes(array $requiredScopes, array $userScopes): void
     {
+        if (in_array('*', $userScopes)) {
+            return;
+        }
+
         foreach ($requiredScopes as $scope) {
             if (!in_array($scope, $userScopes, true)) {
                 throw new AuthenticationException('Missing required scope');
