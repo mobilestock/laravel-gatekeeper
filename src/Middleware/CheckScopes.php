@@ -13,7 +13,7 @@ class CheckScopes extends UserBaseMiddleware
     {
         $user = $this->getUserFromRequest();
         if (!$user->is_client) {
-            throw new UnauthorizedHttpException('Only client tokens are allowed');
+            throw new UnauthorizedHttpException('', 'Only client tokens are allowed');
         }
 
         $this->ensureTokenHasRequiredScopes($scopes, $user->scopes);
