@@ -16,11 +16,11 @@ beforeEach(function () {
 it('should ensure token has required ability', function () {
     $abilities = ['SOME_ABILITY'];
     $gateSpy = Gate::spy();
-    $gateSpy->shouldReceive('allows')->andReturnTrue();
+    $gateSpy->shouldReceive('any')->andReturnTrue();
 
     invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredAbilities', [$abilities]);
 
-    $gateSpy->shouldHaveReceived('allows')->with($abilities)->once();
+    $gateSpy->shouldHaveReceived('any')->with($abilities)->once();
 });
 
 it('should throw exception when token does not have required ability', function () {
