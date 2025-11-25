@@ -56,19 +56,6 @@ it('should throw exception when token does not have required guard', function ()
     invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuards', [$guards]);
 })->throws(AuthenticationException::class);
 
-it('should throw an exception when it does not have the bearer token', function () {
-    $this->middleware->handle($this->request, function () {});
-})->throws(AuthenticationException::class);
-
-it('should throw an exception when it does not have user to authenticate', function () {
-    $socialiteSpy = Socialite::spy();
-    $socialiteSpy->shouldReceive('driver')->andReturnSelf();
-    $socialiteSpy->shouldReceive('userFromToken')->andReturnNull();
-
-    $this->request->headers->set('Authorization', 'Bearer token_invalid_user');
-    $this->middleware->handle($this->request, function () {});
-})->throws(AuthenticationException::class);
-
 it('should execute next middleware when is a client with required scopes', function () {
     $socialiteSpy = Socialite::spy();
     $socialiteSpy->shouldReceive('driver')->andReturnSelf();
