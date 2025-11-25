@@ -5,7 +5,6 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
-use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Middleware\CheckScopesOrAuthorize;
 
 beforeEach(function () {
@@ -57,13 +56,10 @@ it('should throw exception when token does not have required guard', function ()
 })->throws(AuthenticationException::class);
 
 it('should execute next middleware when is a client with required scopes', function () {
-    $socialiteSpy = Socialite::spy();
-    $socialiteSpy->shouldReceive('driver')->andReturnSelf();
-    $socialiteSpy->shouldReceive('userFromToken')->andReturn((object) ['is_client' => true, 'scopes' => ['*']]);
-
     $middlewareSpy = Mockery::spy(CheckScopesOrAuthorize::class)->makePartial();
     $middlewareSpy->shouldAllowMockingProtectedMethods();
-    $middlewareSpy->shouldReceive('ensureTokenHasRequiredScopes');
+    $middlewareSpy->shouldReceive('getUserFromRequest')->andReturn((object) ['is_client' => true, 'scopes' => ['*']]);
+    $middlewareSpy->shouldReceive('ensureTokenHasAnyScope');
 
     $authSpy = Auth::spy()->makePartial();
     $authSpy->shouldReceive('setUser');
@@ -76,11 +72,9 @@ it('should execute next middleware when is a client with required scopes', funct
     expect($result)->toBeInstanceOf(Response::class);
     expect($result->getContent())->toBe('Called Next Middleware To Client');
 
-    $socialiteSpy->shouldHaveReceived('driver')->with('users')->once();
-    $socialiteSpy->shouldHaveReceived('userFromToken')->with('valid_token_to_client')->once();
-
+    $middlewareSpy->shouldHaveReceived('getUserFromRequest')->once();
     $middlewareSpy
-        ->shouldHaveReceived('ensureTokenHasRequiredScopes')
+        ->shouldHaveReceived('ensureTokenHasAnyScope')
         ->with(['read', 'write'], ['*'])
         ->once();
     $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredGuards');
@@ -88,12 +82,9 @@ it('should execute next middleware when is a client with required scopes', funct
 });
 
 it('should execute next middleware when is a user with required guards and abilities', function () {
-    $socialiteSpy = Socialite::spy();
-    $socialiteSpy->shouldReceive('driver')->andReturnSelf();
-    $socialiteSpy->shouldReceive('userFromToken')->andReturn((object) ['is_client' => false, 'scopes' => ['*']]);
-
     $middlewareSpy = Mockery::spy(CheckScopesOrAuthorize::class)->makePartial();
     $middlewareSpy->shouldAllowMockingProtectedMethods();
+    $middlewareSpy->shouldReceive('getUserFromRequest')->andReturn((object) ['is_client' => false, 'scopes' => []]);
     $middlewareSpy->shouldReceive('ensureTokenHasRequiredGuards');
     $middlewareSpy->shouldReceive('ensureTokenHasRequiredAbilities');
 
@@ -107,9 +98,8 @@ it('should execute next middleware when is a user with required guards and abili
 
     expect($result)->toBeInstanceOf(Response::class);
     expect($result->getContent())->toBe('Called Next Middleware To User');
-    $socialiteSpy->shouldHaveReceived('driver')->with('users')->once();
-    $socialiteSpy->shouldHaveReceived('userFromToken')->with('valid_token_to_user')->once();
 
+    $middlewareSpy->shouldHaveReceived('getUserFromRequest')->once();
     $middlewareSpy
         ->shouldHaveReceived('ensureTokenHasRequiredGuards')
         ->with(['admin', 'api', 'web'])
@@ -118,5 +108,5 @@ it('should execute next middleware when is a user with required guards and abili
         ->shouldHaveReceived('ensureTokenHasRequiredAbilities')
         ->with(['read', 'write'])
         ->once();
-    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasRequiredScopes');
+    $middlewareSpy->shouldNotHaveReceived('ensureTokenHasAnyScope');
 });
