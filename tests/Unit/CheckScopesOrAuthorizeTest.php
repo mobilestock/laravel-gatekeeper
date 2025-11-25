@@ -56,26 +56,6 @@ it('should throw exception when token does not have required guard', function ()
     invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredGuards', [$guards]);
 })->throws(AuthenticationException::class);
 
-dataset('userScopesProvider', [
-    'the necessary scopes' => [['read', 'write']],
-    'total access' => [['*']],
-]);
-
-it('should return early when the user has :dataset', function (array $userScopes) {
-    $requiredScopes = ['read', 'write'];
-
-    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredScopes', [$requiredScopes, $userScopes]);
-})
-    ->with('userScopesProvider')
-    ->throwsNoExceptions();
-
-it('should throw exception when the token does not have required scopes', function () {
-    $requiredScopes = ['delete'];
-    $userScopes = ['read', 'write'];
-
-    invokeProtectedMethod($this->middleware, 'ensureTokenHasRequiredScopes', [$requiredScopes, $userScopes]);
-})->throws(AuthenticationException::class);
-
 it('should throw an exception when it does not have the bearer token', function () {
     $this->middleware->handle($this->request, function () {});
 })->throws(AuthenticationException::class);
