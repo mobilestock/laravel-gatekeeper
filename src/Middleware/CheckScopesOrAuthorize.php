@@ -9,24 +9,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
-use Laravel\Socialite\Facades\Socialite;
 use Symfony\Component\HttpFoundation\Response;
 
-class CheckScopesOrAuthorize
+class CheckScopesOrAuthorize extends UserBaseMiddleware
 {
-    /**
-     * @param Request $request
-     * @param Closure $next
-     * @param array<string> $rawMiddlewareParameters
-     * @throws AuthenticationException
-     * @return Response
-     */
     public function handle(Request $request, Closure $next, ...$rawMiddlewareParameters): Response
     {
-        $accessToken = $request->bearerToken();
-        if (empty($accessToken)) {
-            throw new AuthenticationException();
-        }
+        $user = $this->getUserFromRequest();
 
         $configs = ['scopes' => ['*'], 'guards' => [null], 'abilities' => []];
         foreach ($rawMiddlewareParameters as $parameter) {
@@ -35,14 +24,8 @@ class CheckScopesOrAuthorize
         }
         $configs = Arr::only($configs, ['scopes', 'guards', 'abilities']);
 
-        $driver = Socialite::driver('users');
-        $user = $driver->userFromToken($accessToken);
-        if (empty($user)) {
-            throw new AuthenticationException();
-        }
-
         if ($user->is_client) {
-            $this->ensureTokenHasRequiredScopes($configs['scopes'], $user->scopes);
+            $this->ensureTokenHasAnyScope($configs['scopes'], $user->scopes);
         } else {
             $this->ensureTokenHasRequiredGuards($configs['guards']);
             $this->ensureTokenHasRequiredAbilities($configs['abilities']);
@@ -52,21 +35,6 @@ class CheckScopesOrAuthorize
         Auth::setUser($user);
 
         return $next($request);
-    }
-
-    protected function ensureTokenHasRequiredScopes(array $requiredScopes, array $userScopes): void
-    {
-        if (in_array('*', $userScopes)) {
-            return;
-        }
-
-        foreach ($requiredScopes as $scope) {
-            if (in_array($scope, $userScopes, true)) {
-                return;
-            }
-        }
-
-        throw new AuthenticationException();
     }
 
     protected function ensureTokenHasRequiredGuards(array $requiredGuards): void
