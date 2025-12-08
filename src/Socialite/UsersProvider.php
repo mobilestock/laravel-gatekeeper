@@ -4,6 +4,7 @@ namespace MobileStock\Gatekeeper\Socialite;
 
 use GuzzleHttp\RequestOptions;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Two\AbstractProvider;
 use Laravel\Socialite\Two\User;
@@ -11,6 +12,19 @@ use MobileStock\Gatekeeper\Users\AuthenticatableUser;
 
 class UsersProvider extends AbstractProvider
 {
+    protected string $usersApiUrl;
+
+    public function __construct(Request $request,
+    string $clientId,
+    string $clientSecret,
+    string $redirectUrl,
+    array $guzzle = []
+)
+    {
+        parent::__construct($request, $clientId, $clientSecret, $redirectUrl, $guzzle);
+        $this->usersApiUrl = Config::get('services.users.api_url');
+    }
+
     protected function getAuthUrl($state): string
     {
         return $this->buildAuthUrlFromBase(Config::get('services.users.front_url'), $state);
@@ -18,12 +32,14 @@ class UsersProvider extends AbstractProvider
 
     protected function getTokenUrl(): string
     {
-        return Config::get('services.users.api_url') . 'oauth/token';
+        $tokenUrl = "$this->usersApiUrl/oauth/token";
+
+        return $tokenUrl;
     }
 
     protected function getUserByToken($token): array
     {
-        $response = $this->getHttpClient()->get(Config::get('services.users.api_url') . 'api/me', [
+        $response = $this->getHttpClient()->get("$this->usersApiUrl/api/me", [
             RequestOptions::HEADERS => ['Authorization' => 'Bearer ' . $token],
         ]);
 
