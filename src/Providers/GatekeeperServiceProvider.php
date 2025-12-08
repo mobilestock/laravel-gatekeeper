@@ -27,7 +27,9 @@ class GatekeeperServiceProvider extends ServiceProvider
         });
 
         Config::set('services.users.front_url', Config::get('gatekeeper.users_front_url'));
-        Config::set('services.users.api_url', Config::get('gatekeeper.users_api_url'));
+        $usersApiUrl = Config::get('gatekeeper.users_api_url');
+        $usersApiUrl = rtrim($usersApiUrl, '/');
+        Config::set('services.users.api_url', $usersApiUrl);
 
         Gate::define('admin', function (User $user) {
             $userInfo = $user->userInfo();
