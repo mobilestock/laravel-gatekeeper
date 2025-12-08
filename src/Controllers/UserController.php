@@ -53,8 +53,12 @@ class UserController extends Controller
 
     public function logout()
     {
-        Http::withToken(Request::bearerToken())
-            ->post(Config::get('services.users.api_url') . 'api/logout')
+        $usersApiUrl = Config::get('services.users.api_url');
+        $token = Request::bearerToken();
+
+        Http::withToken($token)
+            ->baseUrl($usersApiUrl)
+            ->post( '/api/logout')
             ->throw();
     }
 }
