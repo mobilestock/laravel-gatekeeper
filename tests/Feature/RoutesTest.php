@@ -63,8 +63,7 @@ it('dispatches an event and redirects to the front-end with a user token and cus
 })->with('callbackDataset');
 
 it('logs out the user successfully', function () {
-    Http::fake([
-        Config::get('services.users.api_url') . 'api/logout' => Http::response(),
+    Http::fake(['/api/logout' => Http::response(),
     ]);
 
     $bearerToken = 'testBearerToken';

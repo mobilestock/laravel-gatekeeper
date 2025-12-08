@@ -23,7 +23,7 @@ it('returns the correct token URL', function () {
 
     $tokenUrl = invokeProtectedMethod($provider, 'getTokenUrl');
 
-    expect($tokenUrl)->toBe(Config::get('services.users.api_url') . 'oauth/token');
+    expect($tokenUrl)->toBe('oauth/token');
 });
 
 it('fetches the correct user data by token', function () {
@@ -33,9 +33,7 @@ it('fetches the correct user data by token', function () {
     $mockedClient = Mockery::mock(Client::class);
     $mockedClient
         ->shouldReceive('get')
-        ->with(Config::get('services.users.api_url') . 'api/me', [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $token,
+        ->with('/api/me', ['headers' => ['Authorization' => "Bearer $token",
             ],
         ])
         ->andReturn(new Response(200, body: json_encode(['id' => 123, 'name' => 'Test User'])));
