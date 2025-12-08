@@ -23,7 +23,7 @@ it('returns the correct token URL', function () {
 
     $tokenUrl = invokeProtectedMethod($provider, 'getTokenUrl');
 
-    expect($tokenUrl)->toBe('oauth/token');
+    expect($tokenUrl)->toBe('/oauth/token');
 });
 
 it('fetches the correct user data by token', function () {

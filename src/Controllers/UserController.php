@@ -56,6 +56,6 @@ class UserController extends Controller
         $usersApiUrl = Config::get('services.users.api_url');
         $token = Request::bearerToken();
 
-        Http::withToken($token)->baseUrl($usersApiUrl)->post('/api/logout')->throw();
+        Http::withToken($token)->baseUrl($usersApiUrl)->post('api/logout')->throw();
     }
 }
