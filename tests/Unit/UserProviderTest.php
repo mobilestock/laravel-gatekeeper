@@ -7,6 +7,11 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\Config;
 use Laravel\Socialite\Two\User;
 
+const USERS_API_URL = 'http://api.localhost.com.br';
+beforeEach(function () {
+    Config::set('services.users.api_url', USERS_API_URL);
+});
+
 it('builds the correct authorization URL', function () {
     $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');
 
@@ -23,7 +28,7 @@ it('returns the correct token URL', function () {
 
     $tokenUrl = invokeProtectedMethod($provider, 'getTokenUrl');
 
-    expect($tokenUrl)->toBe('/oauth/token');
+    expect($tokenUrl)->toBe(USERS_API_URL . '/oauth/token');
 });
 
 it('fetches the correct user data by token', function () {
@@ -33,7 +38,11 @@ it('fetches the correct user data by token', function () {
     $mockedClient = Mockery::mock(Client::class);
     $mockedClient
         ->shouldReceive('get')
-        ->with('/api/me', ['headers' => ['Authorization' => "Bearer $token"]])
+        ->with(USERS_API_URL . '/api/me', [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $token,
+            ],
+        ])
         ->andReturn(new Response(200, body: json_encode(['id' => 123, 'name' => 'Test User'])));
 
     $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');
