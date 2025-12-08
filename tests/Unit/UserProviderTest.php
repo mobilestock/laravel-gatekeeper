@@ -33,9 +33,7 @@ it('fetches the correct user data by token', function () {
     $mockedClient = Mockery::mock(Client::class);
     $mockedClient
         ->shouldReceive('get')
-        ->with('/api/me', ['headers' => ['Authorization' => "Bearer $token",
-            ],
-        ])
+        ->with('/api/me', ['headers' => ['Authorization' => "Bearer $token"]])
         ->andReturn(new Response(200, body: json_encode(['id' => 123, 'name' => 'Test User'])));
 
     $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');

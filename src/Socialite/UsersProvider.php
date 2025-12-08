@@ -14,13 +14,13 @@ class UsersProvider extends AbstractProvider
 {
     protected string $usersApiUrl;
 
-    public function __construct(Request $request,
-    string $clientId,
-    string $clientSecret,
-    string $redirectUrl,
-    array $guzzle = []
-)
-    {
+    public function __construct(
+        Request $request,
+        string $clientId,
+        string $clientSecret,
+        string $redirectUrl,
+        array $guzzle = []
+    ) {
         parent::__construct($request, $clientId, $clientSecret, $redirectUrl, $guzzle);
         $this->usersApiUrl = Config::get('services.users.api_url');
     }
