@@ -26,13 +26,13 @@ class CheckScopesOrAuthorize extends UserBaseMiddleware
 
         if ($user->is_client) {
             $this->ensureTokenHasAnyScope($configs['scopes'], $user->scopes);
+
+            $user = new GenericUser((array) $user);
+            Auth::setUser($user);
         } else {
             $this->ensureTokenHasRequiredGuards($configs['guards']);
             $this->ensureTokenHasRequiredAbilities($configs['abilities']);
         }
-
-        $user = new GenericUser((array) $user);
-        Auth::setUser($user);
 
         return $next($request);
     }
