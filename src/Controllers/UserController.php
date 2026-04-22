@@ -17,6 +17,9 @@ class UserController extends Controller
 {
     public const REDIRECT_PARAM = 'GATEKEEPER_access-token';
 
+    /**
+     * @hideFromAPIDocumentation
+     */
     public function redirect()
     {
         $state = Request::get('state');
@@ -26,6 +29,9 @@ class UserController extends Controller
             ->redirect();
     }
 
+    /**
+     * @hideFromAPIDocumentation
+     */
     public function callback()
     {
         $state = explode(',', Request::get('state'));
