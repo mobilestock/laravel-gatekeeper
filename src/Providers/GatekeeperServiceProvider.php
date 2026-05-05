@@ -2,12 +2,14 @@
 
 namespace MobileStock\Gatekeeper\Providers;
 
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Socialite\Facades\Socialite;
+use MobileStock\Gatekeeper\Action\GetTokenM2MAction;
 use MobileStock\Gatekeeper\Contracts\User;
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use MobileStock\Gatekeeper\TokenGuard;
@@ -35,6 +37,8 @@ class GatekeeperServiceProvider extends ServiceProvider
             $userInfo = $user->userInfo();
             return $userInfo['is_admin'];
         });
+        
+        PendingRequest::macro('withM2M', fn() => $this->withToken(GetTokenM2MAction::execute()));
     }
 
     public function register(): void
