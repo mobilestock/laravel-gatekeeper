@@ -21,7 +21,7 @@ class GetTokenM2MAction
                 'client_secret' => Config::get('services.users.m2m.client_secret'),
                 'scope' => '*',
             ];
-
+            // @issue: https://github.com/mobilestock/backend/discussions/2216
             $response = Http::baseUrl($baseUrl)->post('oauth/token', $payload);
 
             $accessToken = $response->json('access_token');
