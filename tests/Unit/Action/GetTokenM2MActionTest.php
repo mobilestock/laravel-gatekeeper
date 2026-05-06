@@ -4,7 +4,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use MobileStock\Gatekeeper\Action\GetTokenM2MAction;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 describe('GetTokenM2MAction', function () {
     beforeEach(function () {
@@ -13,16 +12,26 @@ describe('GetTokenM2MAction', function () {
         Config::set('app.name', 'test-app');
         Config::set('app.env', 'testing');
         Config::set('gatekeeper.users_api_url', 'https://users-api.test');
-        Config::set('services.m2m.client_id', 'test-client-id');
-        Config::set('services.m2m.client_secret', 'test-client-secret');
-        Config::set('services.m2m.ttl', 60);
+        Config::set('services.users.m2m.client_id', 'test-client-id');
+        Config::set('services.users.m2m.client_secret', 'test-client-secret');
+        Config::set('services.users.m2m.ttl', 60);
     });
 
     describe('execute', function () {
         it('retrieves m2m token successfully from oauth endpoint', function () {
-            Http::fake(function ($request) {
-                return Http::response(['access_token' => 'test-token-123']);
-            });
+            $response = Mockery::mock();
+            $response->shouldReceive('json')->with('access_token')->andReturn('test-token-123');
+
+            Http::shouldReceive('baseUrl')->once()->with('https://users-api.test')->andReturnSelf();
+            Http::shouldReceive('post')
+                ->once()
+                ->with('oauth/token', [
+                    'grant_type' => 'client_credentials',
+                    'client_id' => 'test-client-id',
+                    'client_secret' => 'test-client-secret',
+                    'scope' => '*',
+                ])
+                ->andReturn($response);
 
             $token = GetTokenM2MAction::execute();
 
@@ -30,47 +39,57 @@ describe('GetTokenM2MAction', function () {
         });
 
         it('sends correct client credentials grant request to oauth endpoint', function () {
-            Http::fake(function ($request) {
-                return Http::response(['access_token' => 'test-token']);
-            });
+            Config::set('services.users.m2m.client_id', 'test-client-id-custom');
+            Config::set('services.users.m2m.client_secret', 'test-client-secret-custom');
+
+            $response = Mockery::mock();
+            $response->shouldReceive('json')->with('access_token')->andReturn('test-token');
+
+            Http::shouldReceive('baseUrl')->once()->with('https://users-api.test')->andReturnSelf();
+            Http::shouldReceive('post')
+                ->once()
+                ->with('oauth/token', [
+                    'grant_type' => 'client_credentials',
+                    'client_id' => 'test-client-id-custom',
+                    'client_secret' => 'test-client-secret-custom',
+                    'scope' => '*',
+                ])
+                ->andReturn($response);
 
             GetTokenM2MAction::execute();
-
-            Http::assertSent(function ($request) {
-                return $request->url() === 'https://users-api.test/oauth/token'
-                    && $request->method() === 'POST'
-                    && $request['grant_type'] === 'client_credentials'
-                    && $request['scope'] === '*';
-            });
         });
 
-        it('throws exception when http request returns unsuccessful status', function () {
-            Http::fake(function ($request) {
-                return Http::response([], 401);
-            });
+        it('returns null when http request returns unsuccessful status', function () {
+            $response = Mockery::mock();
+            $response->shouldReceive('json')->with('access_token')->andReturn(null);
 
-            expect(fn() => GetTokenM2MAction::execute())
-                ->toThrow(BadRequestHttpException::class);
+            Http::shouldReceive('baseUrl')->once()->with('https://users-api.test')->andReturnSelf();
+            Http::shouldReceive('post')->once()->andReturn($response);
+
+            $token = GetTokenM2MAction::execute();
+
+            expect($token)->toBeNull();
         });
 
         it('caches token to avoid repeated http requests', function () {
-            Http::fake(function ($request) {
-                return Http::response(['access_token' => 'cached-token']);
-            });
+            $response = Mockery::mock();
+            $response->shouldReceive('json')->with('access_token')->andReturn('cached-token');
+
+            Http::shouldReceive('baseUrl')->once()->with('https://users-api.test')->andReturnSelf();
+            Http::shouldReceive('post')->once()->andReturn($response);
 
             $firstToken = GetTokenM2MAction::execute();
             $secondToken = GetTokenM2MAction::execute();
 
-            expect($firstToken)->toBe('cached-token')
-                ->and($secondToken)->toBe('cached-token');
-
-            Http::assertSentCount(1);
+            expect($firstToken)->toBe('cached-token')->and($secondToken)->toBe('cached-token');
         });
 
         it('uses app name and environment in cache key', function () {
-            Http::fake(function ($request) {
-                return Http::response(['access_token' => 'token']);
-            });
+            $response = Mockery::mock();
+            $response->shouldReceive('json')->with('access_token')->andReturn('token');
+
+            Http::shouldReceive('baseUrl')->once()->with('https://users-api.test')->andReturnSelf();
+            Http::shouldReceive('post')->once()->andReturn($response);
 
             Config::set('app.name', 'marketplace-api');
             Config::set('app.env', 'production');
@@ -82,16 +101,16 @@ describe('GetTokenM2MAction', function () {
             expect($cachedValue)->toBe('token');
         });
 
-        it('throws exception with descriptive message when request fails', function () {
-            Http::fake(function ($request) {
-                return Http::response([], 500);
-            });
+        it('returns null when request fails with server error', function () {
+            $response = Mockery::mock();
+            $response->shouldReceive('json')->with('access_token')->andReturn(null);
 
-            expect(fn() => GetTokenM2MAction::execute())
-                ->toThrow(
-                    BadRequestHttpException::class,
-                    'Failed to retrieve M2M token'
-                );
+            Http::shouldReceive('baseUrl')->once()->with('https://users-api.test')->andReturnSelf();
+            Http::shouldReceive('post')->once()->andReturn($response);
+
+            $token = GetTokenM2MAction::execute();
+
+            expect($token)->toBeNull();
         });
     });
 });
