@@ -14,6 +14,7 @@ describe('GetTokenM2MAction', function () {
         Config::set('gatekeeper.users_api_url', 'https://users-api.test');
         Config::set('services.users.m2m.client_id', 'test-client-id');
         Config::set('services.users.m2m.client_secret', 'test-client-secret');
+        Config::set('services.users.m2m.scope', 'access:verified');
         Config::set('services.users.m2m.ttl', 60);
     });
 
@@ -29,7 +30,7 @@ describe('GetTokenM2MAction', function () {
                     'grant_type' => 'client_credentials',
                     'client_id' => 'test-client-id',
                     'client_secret' => 'test-client-secret',
-                    'scope' => '*',
+                    'scope' => 'access:verified',
                 ])
                 ->andReturn($response);
 
@@ -41,6 +42,7 @@ describe('GetTokenM2MAction', function () {
         it('sends correct client credentials grant request to oauth endpoint', function () {
             Config::set('services.users.m2m.client_id', 'test-client-id-custom');
             Config::set('services.users.m2m.client_secret', 'test-client-secret-custom');
+            Config::set('services.users.m2m.scope', 'manage:oauth-clients access:verified');
 
             $response = Mockery::mock();
             $response->shouldReceive('json')->with('access_token')->andReturn('test-token');
@@ -52,7 +54,7 @@ describe('GetTokenM2MAction', function () {
                     'grant_type' => 'client_credentials',
                     'client_id' => 'test-client-id-custom',
                     'client_secret' => 'test-client-secret-custom',
-                    'scope' => '*',
+                    'scope' => 'manage:oauth-clients access:verified',
                 ])
                 ->andReturn($response);
 
