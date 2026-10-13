@@ -5,6 +5,7 @@ namespace MobileStock\Gatekeeper;
 use Illuminate\Contracts\Auth\UserProvider as AuthUserProvider;
 use Illuminate\Http\Request;
 use Laravel\Socialite\Facades\Socialite;
+use MobileStock\Gatekeeper\Enum\Scope;
 
 class TokenGuard extends \Illuminate\Auth\TokenGuard
 {
@@ -37,6 +38,10 @@ class TokenGuard extends \Illuminate\Auth\TokenGuard
 
         try {
             $socialiteUser = Socialite::driver('users')->userFromToken($accessToken);
+            if (in_array(Scope::EXTERNAL_API->value, $socialiteUser->scopes ?? [], true)) {
+                return $this->user = null;
+            }
+
             $user = Socialite::driver('users')->adaptSocialiteUserIntoAuthenticatable($socialiteUser);
         } catch (\Throwable) {
         }
