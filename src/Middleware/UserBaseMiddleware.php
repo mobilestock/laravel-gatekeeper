@@ -5,10 +5,21 @@ namespace MobileStock\Gatekeeper\Middleware;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Request;
 use Laravel\Socialite\Facades\Socialite;
+use MobileStock\Gatekeeper\Enum\Scope;
 
 class UserBaseMiddleware
 {
     protected function getUserFromRequest(): object
+    {
+        $user = $this->resolveUserFromRequest();
+        if (in_array(Scope::EXTERNAL_API->value, $user->scopes ?? [], true)) {
+            throw new AuthenticationException();
+        }
+
+        return $user;
+    }
+
+    protected function resolveUserFromRequest(): object
     {
         $accessToken = Request::bearerToken();
         if (empty($accessToken)) {
