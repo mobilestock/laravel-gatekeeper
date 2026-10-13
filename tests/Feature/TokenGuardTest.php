@@ -252,3 +252,33 @@ it('should return an empty user if provider sent and no user found', function ()
 
     expect($user)->toBeNull();
 });
+
+it('should return a null user when the token has the external scope', function () {
+    $request = Request::create(
+        '/api/protected-route',
+        'GET',
+        server: [
+            'HTTP_AUTHORIZATION' => 'Bearer personal-access-token',
+        ]
+    );
+
+    /** @var Mockery\MockInterface|UserProvider $provider */
+    $provider = Mockery::spy(UserProvider::class);
+
+    $socialiteUser = (new User())->map(['id' => 12, 'scopes' => ['external:api']]);
+
+    Socialite::shouldReceive('driver')
+        ->with('users')
+        ->andReturnSelf()
+        ->getMock()
+        ->shouldReceive('userFromToken')
+        ->with('personal-access-token')
+        ->andReturn($socialiteUser);
+
+    $tokenGuard = new TokenGuard($provider, $request);
+
+    $user = $tokenGuard->user();
+
+    expect($user)->toBeNull();
+    $provider->shouldNotHaveReceived('retrieveByCredentials');
+});
