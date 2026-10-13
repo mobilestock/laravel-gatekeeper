@@ -63,3 +63,36 @@ it('should return the user when the token is valid', function () {
     $socialiteSpy->shouldHaveReceived('driver')->with('users')->once();
     $socialiteSpy->shouldHaveReceived('userFromToken')->with($bearerToken)->once();
 });
+
+describe('default refusal of the external scope', function () {
+    beforeEach(function () {
+        $requestSpy = Request::spy()->makePartial();
+        $requestSpy->shouldReceive('bearerToken')->andReturn('valid_token');
+
+        $this->socialiteSpy = Socialite::spy();
+        $this->socialiteSpy->shouldReceive('driver')->andReturnSelf();
+    });
+
+    it('should throw an exception when the token has :dataset', function (array $userScopes) {
+        $this->socialiteSpy->shouldReceive('userFromToken')->andReturn((object) ['id' => 1, 'scopes' => $userScopes]);
+
+        expect(fn() => invokeProtectedMethod($this->middleware, 'getUserFromRequest'))->toThrow(
+            AuthenticationException::class
+        );
+    })->with([
+        'only the external scope' => [['external:api']],
+        'the external scope among others' => [['access:verified', 'external:api']],
+    ]);
+
+    it('should return the user when the token has :dataset', function (array $userScopes) {
+        $expectedUser = (object) ['id' => 1, 'scopes' => $userScopes];
+        $this->socialiteSpy->shouldReceive('userFromToken')->andReturn($expectedUser);
+
+        $actualUser = invokeProtectedMethod($this->middleware, 'getUserFromRequest');
+
+        expect($actualUser)->toBe($expectedUser);
+    })->with([
+        'total access' => [['*']],
+        'the site login scope' => [['access:verified']],
+    ]);
+});
