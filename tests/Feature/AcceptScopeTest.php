@@ -95,6 +95,7 @@ describe('accept', function () {
     ]);
 
     it('should reject a key that the users api does not recognize (:dataset)', function (int $status) {
+        Exceptions::fake();
         $this->usersApiResponses->append(
             new GuzzleResponse($status, [], json_encode(['message' => 'Unauthenticated.']))
         );
@@ -102,6 +103,7 @@ describe('accept', function () {
         $response = $this->withToken('revoked-personal-access-token')->getJson('/external');
 
         $response->assertUnauthorized();
+        Exceptions::assertNothingReported();
     })->with([
         'unauthorized' => [401],
         'forbidden' => [403],
@@ -114,23 +116,23 @@ describe('accept', function () {
         expect($this->usersApiRequests)->toBeEmpty();
     });
 
-    it('should answer service unavailable when the users api fails (:dataset)', function (Closure $failure) {
+    it('should answer service unavailable when the users api fails (:dataset)', function (
+        GuzzleResponse|ConnectException $failure
+    ) {
         Exceptions::fake();
-        $this->usersApiResponses->append($failure());
+        $this->usersApiResponses->append($failure);
 
         $response = $this->withToken('personal-access-token')->getJson('/external');
 
-        $response->assertServiceUnavailable();
+        $response->assertServiceUnavailable()->assertExactJson(['message' => 'Service Unavailable.']);
         expect(Exceptions::reported())
             ->toHaveCount(1)
             ->each->toBeInstanceOf(GuzzleException::class);
     })->with([
-        'server error' => [fn() => new GuzzleResponse(500)],
-        'service unavailable' => [fn() => new GuzzleResponse(503)],
-        'unexpected client error' => [fn() => new GuzzleResponse(404)],
-        'connection failure' => [
-            fn() => new ConnectException('Connection timed out', new GuzzleRequest('GET', '/api/me')),
-        ],
+        'server error' => [new GuzzleResponse(500)],
+        'service unavailable' => [new GuzzleResponse(503)],
+        'unexpected client error' => [new GuzzleResponse(404)],
+        'connection failure' => [new ConnectException('Connection timed out', new GuzzleRequest('GET', '/api/me'))],
     ]);
 
     it('should reject every token when the app has no client id (:dataset)', function (?string $appClientId) {
