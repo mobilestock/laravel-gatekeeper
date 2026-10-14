@@ -3,6 +3,7 @@
 namespace MobileStock\Gatekeeper\Clients;
 
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
@@ -102,6 +103,8 @@ class PersonalAccessTokenClient
                 ->send($method, $url, $options);
         } catch (ConnectionException $exception) {
             throw new PersonalAccessTokenException($operation, null, $exception);
+        } catch (RequestException $exception) {
+            throw new PersonalAccessTokenException($operation, $exception->response->status());
         }
 
         return $response;
