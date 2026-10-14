@@ -1,12 +1,16 @@
 <?php
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Middleware;
+use GuzzleHttp\Psr7\Request as GuzzleRequest;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Route;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Enum\Scope;
@@ -90,13 +94,44 @@ describe('accept', function () {
         'site login' => [false, ['access:verified']],
     ]);
 
-    it('should reject a key that the users api does not recognize', function () {
-        $this->usersApiResponses->append(new GuzzleResponse(401, [], json_encode(['message' => 'Unauthenticated.'])));
+    it('should reject a key that the users api does not recognize (:dataset)', function (int $status) {
+        $this->usersApiResponses->append(
+            new GuzzleResponse($status, [], json_encode(['message' => 'Unauthenticated.']))
+        );
 
         $response = $this->withToken('revoked-personal-access-token')->getJson('/external');
 
         $response->assertUnauthorized();
+    })->with([
+        'unauthorized' => [401],
+        'forbidden' => [403],
+    ]);
+
+    it('should reject a request without a token', function () {
+        $response = $this->getJson('/external');
+
+        $response->assertUnauthorized();
+        expect($this->usersApiRequests)->toBeEmpty();
     });
+
+    it('should answer service unavailable when the users api fails (:dataset)', function (Closure $failure) {
+        Exceptions::fake();
+        $this->usersApiResponses->append($failure());
+
+        $response = $this->withToken('personal-access-token')->getJson('/external');
+
+        $response->assertServiceUnavailable();
+        expect(Exceptions::reported())
+            ->toHaveCount(1)
+            ->each->toBeInstanceOf(GuzzleException::class);
+    })->with([
+        'server error' => [fn() => new GuzzleResponse(500)],
+        'service unavailable' => [fn() => new GuzzleResponse(503)],
+        'unexpected client error' => [fn() => new GuzzleResponse(404)],
+        'connection failure' => [
+            fn() => new ConnectException('Connection timed out', new GuzzleRequest('GET', '/api/me')),
+        ],
+    ]);
 
     it('should reject every token when the app has no client id (:dataset)', function (?string $appClientId) {
         Config::set('services.users.m2m.client_id', $appClientId);
