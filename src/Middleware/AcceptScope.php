@@ -33,10 +33,10 @@ class AcceptScope extends UserBaseMiddleware
             }
 
             report($exception);
-            throw new ServiceUnavailableHttpException(previous: $exception);
+            throw new ServiceUnavailableHttpException(message: 'Service Unavailable.', previous: $exception);
         } catch (Throwable $exception) {
             report($exception);
-            throw new ServiceUnavailableHttpException(previous: $exception);
+            throw new ServiceUnavailableHttpException(message: 'Service Unavailable.', previous: $exception);
         }
 
         if (!in_array($scope, $socialiteUser->scopes ?? [], true)) {
