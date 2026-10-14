@@ -1,5 +1,7 @@
 <?php
 
+use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -26,6 +28,12 @@ beforeEach(function () {
     $this->m2mTokenResponse = Http::response(['access_token' => $this->m2mToken]);
     $this->usersApiResponse = Http::response(status: 204);
     $this->sentOptions = [];
+    $this->personalAccessToken = [
+        'id' => PAT_CLIENT_TOKEN_ID,
+        'name' => 'Loja A',
+        'scopes' => ['external:api'],
+        'created_at' => '2026-10-14T12:18:28.000000Z',
+    ];
     Http::fake(function (Request $request, array $options) {
         if (str_ends_with($request->url(), '/oauth/token')) {
             return $this->m2mTokenResponse;
@@ -40,13 +48,7 @@ beforeEach(function () {
 describe('create', function () {
     it('should create a personal access token for the user', function () {
         $this->usersApiResponse = Http::response(
-            [
-                'id' => PAT_CLIENT_TOKEN_ID,
-                'name' => 'Loja A',
-                'scopes' => ['external:api'],
-                'created_at' => '2026-10-14T12:18:28.000000Z',
-                'token' => 'personal-access-token',
-            ],
+            [...$this->personalAccessToken, 'token' => 'personal-access-token'],
             201
         );
 
@@ -73,14 +75,7 @@ describe('create', function () {
 
 describe('list', function () {
     it('should list the personal access tokens of the user without the token', function () {
-        $this->usersApiResponse = Http::response([
-            [
-                'id' => PAT_CLIENT_TOKEN_ID,
-                'name' => 'Loja A',
-                'scopes' => ['external:api'],
-                'created_at' => '2026-10-14T12:18:28.000000Z',
-            ],
-        ]);
+        $this->usersApiResponse = Http::response([$this->personalAccessToken]);
 
         $personalAccessTokens = $this->client->list(PAT_CLIENT_USER_ID);
 
@@ -123,14 +118,17 @@ describe('delete', function () {
         'not found' => [404, ['message' => 'Not found.']],
     ]);
 
-    it('should throw when the users api answers 404 for an unknown route', function () {
-        $this->usersApiResponse = Http::response(['message' => 'The route could not be found.'], 404);
+    it('should throw when the users api answers :dataset', function (int $status, array $body) {
+        $this->usersApiResponse = Http::response($body, $status);
 
         expect(fn() => $this->client->delete(PAT_CLIENT_USER_ID, PAT_CLIENT_TOKEN_ID))->toThrow(
             PersonalAccessTokenException::class,
-            'Personal access token delete failed with status 404'
+            "Personal access token delete failed with status $status"
         );
-    });
+    })->with([
+        'an unknown route' => [404, ['message' => 'The route could not be found.']],
+        'a server error with the not found message' => [500, ['message' => 'Not found.']],
+    ]);
 
     it('should encode the token id inside the url', function () {
         $this->client->delete(PAT_CLIENT_USER_ID, '../../oauth/clients/x?revoked=1');
@@ -167,6 +165,22 @@ describe('failures', function () {
             'Personal access token list failed with status none'
         );
         Http::assertNotSent(fn(Request $request) => str_contains($request->url(), 'personal-access-tokens'));
+    });
+
+    it('should throw without the response body when the users api response is cut', function () {
+        $this->usersApiResponse = fn(Request $request) => throw new GuzzleRequestException(
+            'cURL error 18: transfer closed with 460 bytes remaining to read',
+            $request->toPsrRequest(),
+            new GuzzleResponse(500, [], '{"message":"response-body')
+        );
+
+        expect(fn() => $this->client->list(PAT_CLIENT_USER_ID))->toThrow(
+            fn(PersonalAccessTokenException $exception) => expect($exception)
+                ->getMessage()
+                ->toBe('Personal access token list failed with status 500')
+                ->getPrevious()
+                ->toBeNull()
+        );
     });
 
     it('should throw when the users api cannot be reached', function () {
