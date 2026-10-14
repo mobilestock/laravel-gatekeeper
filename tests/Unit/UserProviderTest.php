@@ -97,3 +97,19 @@ it('adapts socialite user to a authenticatable class', function () {
     expect($authUser->id)->toBe($socialiteUser->attributes['id']);
     expect($authUser->name)->toBe($socialiteUser->attributes['name']);
 });
+
+it('limits the users api call with default timeouts', function () {
+    $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url');
+
+    $httpClient = invokeProtectedMethod($provider, 'getHttpClient');
+
+    expect($httpClient->getConfig())->toMatchArray(['connect_timeout' => 5, 'timeout' => 30]);
+});
+
+it('keeps the timeouts configured by the app', function () {
+    $provider = new UsersProvider(Request::instance(), 'client-id', 'client-secret', 'redirect-url', ['timeout' => 10]);
+
+    $httpClient = invokeProtectedMethod($provider, 'getHttpClient');
+
+    expect($httpClient->getConfig())->toMatchArray(['connect_timeout' => 5, 'timeout' => 10]);
+});
