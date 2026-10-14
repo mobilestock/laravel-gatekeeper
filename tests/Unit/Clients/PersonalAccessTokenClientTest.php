@@ -150,6 +150,8 @@ describe('failures', function () {
                 ->toBe("Personal access token $operation failed with status 500")
                 ->status->toBe(500)
                 ->operation->toBe($operation)
+                ->getPrevious()
+                ->toBeNull()
         );
     })->with([
         'create' => ['create', [PAT_CLIENT_USER_ID, 'Loja A']],
