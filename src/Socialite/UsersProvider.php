@@ -21,7 +21,9 @@ class UsersProvider extends AbstractProvider
         string $redirectUrl,
         array $guzzle = []
     ) {
-        parent::__construct($request, $clientId, $clientSecret, $redirectUrl, $guzzle);
+        $guzzleOptions = $guzzle + ['connect_timeout' => 5, 'timeout' => 30];
+
+        parent::__construct($request, $clientId, $clientSecret, $redirectUrl, $guzzleOptions);
         $this->usersApiUrl = Config::get('services.users.api_url');
     }
 
