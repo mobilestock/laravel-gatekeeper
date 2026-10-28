@@ -17,16 +17,26 @@ class UserController extends Controller
 {
     public const REDIRECT_PARAM = 'GATEKEEPER_access-token';
 
+    public const LOGIN_PROMPT = 'login';
+
     /**
+     * Besides the state, only two parameters reach the portal, by allow list: prompt=login (log in with another
+     * account) and login_hint=<id> (switch to an account of the browser without the screen). Anything else is dropped.
+     *
      * @hideFromAPIDocumentation
      */
     public function redirect()
     {
         $state = Request::get('state');
-        return Socialite::driver('users')
-            ->with(['state' => $state])
+        $prompt = Request::get('prompt') === self::LOGIN_PROMPT ? self::LOGIN_PROMPT : null;
+        $loginHint = filter_var(Request::get('login_hint'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+
+        $redirect = Socialite::driver('users')
+            ->with(['state' => $state, 'prompt' => $prompt, 'login_hint' => $loginHint === false ? null : $loginHint])
             ->stateless()
             ->redirect();
+
+        return $redirect;
     }
 
     /**

@@ -10,13 +10,28 @@ use MobileStock\Gatekeeper\Controllers\UserController;
 use MobileStock\Gatekeeper\Events\UserAuthenticated;
 use Symfony\Component\HttpFoundation\Response;
 
+const OAUTH_SERVER_URL = 'http://localhost?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code';
+
 it('redirects to the oauth server', function () {
     $response = $this->get('/oauth/redirect');
 
-    $response->assertRedirect(
-        'http://localhost?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code'
-    );
+    $response->assertRedirect(OAUTH_SERVER_URL);
 });
+
+it('passes the portal parameters of the allow list on to the oauth server', function (string $query, string $passed) {
+    $response = $this->get('/oauth/redirect?' . $query);
+
+    $response->assertRedirect(OAUTH_SERVER_URL . $passed);
+})->with([
+    'state' => ['state=DELIVERER', '&state=DELIVERER'],
+    'account to switch to' => ['login_hint=123', '&login_hint=123'],
+    'log in with another account' => ['prompt=login', '&prompt=login'],
+    'state with the account' => ['state=DELIVERER&login_hint=123', '&state=DELIVERER&login_hint=123'],
+    'prompt the portal does not know' => ['prompt=consent', ''],
+    'account that is not a number' => ['login_hint=abc', ''],
+    'account that is not positive' => ['login_hint=0', ''],
+    'parameter outside the allow list' => ['foo=1', ''],
+]);
 
 dataset('callbackDataset', [
     'valid state' => ['valid_state', ['valid_state']],
