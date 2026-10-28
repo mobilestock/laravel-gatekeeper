@@ -20,16 +20,13 @@ class UserController extends Controller
     public const LOGIN_PROMPT = 'login';
 
     /**
-     * Besides the state, only two parameters reach the portal, by allow list: prompt=login (log in with another
-     * account) and login_hint=<id> (switch to an account of the browser without the screen). Anything else is dropped.
-     *
      * @hideFromAPIDocumentation
      */
     public function redirect()
     {
         $state = Request::get('state');
-        $prompt = Request::get('prompt') === self::LOGIN_PROMPT ? self::LOGIN_PROMPT : null;
-        $loginHintInput = Request::get('login_hint');
+        $prompt = Request::query('prompt') === self::LOGIN_PROMPT ? self::LOGIN_PROMPT : null;
+        $loginHintInput = Request::query('login_hint');
         $loginHint = filter_var($loginHintInput, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
         $redirect = Socialite::driver('users')

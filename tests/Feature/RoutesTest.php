@@ -12,12 +12,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 const OAUTH_SERVER_URL = 'http://localhost?client_id=client-id&redirect_uri=redirect-url&scope=&response_type=code';
 
-it('redirects to the oauth server', function () {
-    $response = $this->get('/oauth/redirect');
-
-    $response->assertRedirect(OAUTH_SERVER_URL);
-});
-
 describe('redirect', function () {
     it('should pass the portal parameters of the allow list on to the oauth server', function (
         string $query,
@@ -27,13 +21,28 @@ describe('redirect', function () {
 
         $response->assertRedirect(OAUTH_SERVER_URL . $passed);
     })->with([
+        'without parameters' => ['', ''],
         'state' => ['state=DELIVERER', '&state=DELIVERER'],
+        'state literal null' => ['state=null', '&state=null'],
         'account to switch to' => ['login_hint=123', '&login_hint=123'],
+        'account with a sign' => ['login_hint=%2B123', '&login_hint=123'],
+        'account with spaces around' => ['login_hint=%20123%20', '&login_hint=123'],
         'log in with another account' => ['prompt=login', '&prompt=login'],
         'state with the account' => ['state=DELIVERER&login_hint=123', '&state=DELIVERER&login_hint=123'],
+        'prompt with the account, in the order of the allow list' => [
+            'login_hint=123&prompt=login',
+            '&prompt=login&login_hint=123',
+        ],
         'prompt the portal does not know' => ['prompt=consent', ''],
+        'prompt in upper case' => ['prompt=LOGIN', ''],
+        'prompt sent as a list' => ['prompt[]=login', ''],
         'account that is not a number' => ['login_hint=abc', ''],
         'account that is not positive' => ['login_hint=0', ''],
+        'account that is negative' => ['login_hint=-5', ''],
+        'account with a leading zero' => ['login_hint=0123', ''],
+        'account in scientific notation' => ['login_hint=1e3', ''],
+        'account with decimals' => ['login_hint=1.5', ''],
+        'account sent as a list' => ['login_hint[]=1', ''],
         'parameter outside the allow list' => ['foo=1', ''],
     ]);
 });
