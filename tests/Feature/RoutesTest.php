@@ -18,20 +18,25 @@ it('redirects to the oauth server', function () {
     $response->assertRedirect(OAUTH_SERVER_URL);
 });
 
-it('passes the portal parameters of the allow list on to the oauth server', function (string $query, string $passed) {
-    $response = $this->get('/oauth/redirect?' . $query);
+describe('redirect', function () {
+    it('should pass the portal parameters of the allow list on to the oauth server', function (
+        string $query,
+        string $passed
+    ) {
+        $response = $this->get('/oauth/redirect?' . $query);
 
-    $response->assertRedirect(OAUTH_SERVER_URL . $passed);
-})->with([
-    'state' => ['state=DELIVERER', '&state=DELIVERER'],
-    'account to switch to' => ['login_hint=123', '&login_hint=123'],
-    'log in with another account' => ['prompt=login', '&prompt=login'],
-    'state with the account' => ['state=DELIVERER&login_hint=123', '&state=DELIVERER&login_hint=123'],
-    'prompt the portal does not know' => ['prompt=consent', ''],
-    'account that is not a number' => ['login_hint=abc', ''],
-    'account that is not positive' => ['login_hint=0', ''],
-    'parameter outside the allow list' => ['foo=1', ''],
-]);
+        $response->assertRedirect(OAUTH_SERVER_URL . $passed);
+    })->with([
+        'state' => ['state=DELIVERER', '&state=DELIVERER'],
+        'account to switch to' => ['login_hint=123', '&login_hint=123'],
+        'log in with another account' => ['prompt=login', '&prompt=login'],
+        'state with the account' => ['state=DELIVERER&login_hint=123', '&state=DELIVERER&login_hint=123'],
+        'prompt the portal does not know' => ['prompt=consent', ''],
+        'account that is not a number' => ['login_hint=abc', ''],
+        'account that is not positive' => ['login_hint=0', ''],
+        'parameter outside the allow list' => ['foo=1', ''],
+    ]);
+});
 
 dataset('callbackDataset', [
     'valid state' => ['valid_state', ['valid_state']],

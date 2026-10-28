@@ -29,7 +29,8 @@ class UserController extends Controller
     {
         $state = Request::get('state');
         $prompt = Request::get('prompt') === self::LOGIN_PROMPT ? self::LOGIN_PROMPT : null;
-        $loginHint = filter_var(Request::get('login_hint'), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+        $loginHintInput = Request::get('login_hint');
+        $loginHint = filter_var($loginHintInput, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
 
         $redirect = Socialite::driver('users')
             ->with(['state' => $state, 'prompt' => $prompt, 'login_hint' => $loginHint === false ? null : $loginHint])
