@@ -8,14 +8,28 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Doctor\Doctor;
 use Laravel\Socialite\Facades\Socialite;
 use MobileStock\Gatekeeper\Action\GetTokenM2MAction;
 use MobileStock\Gatekeeper\Contracts\User;
+use MobileStock\Gatekeeper\Doctor\UsersApiIsReachable;
+use MobileStock\Gatekeeper\Doctor\UsersFrontIsReachable;
+use MobileStock\Gatekeeper\Doctor\UsersLoginClientIsAccepted;
+use MobileStock\Gatekeeper\Doctor\UsersLoginRedirectIsRegistered;
+use MobileStock\Gatekeeper\Doctor\UsersM2MClientIsAccepted;
 use MobileStock\Gatekeeper\Socialite\UsersProvider;
 use MobileStock\Gatekeeper\TokenGuard;
 
 class GatekeeperServiceProvider extends ServiceProvider
 {
+    public const DOCTOR_DIAGNOSTICS = [
+        UsersApiIsReachable::class,
+        UsersFrontIsReachable::class,
+        UsersLoginClientIsAccepted::class,
+        UsersLoginRedirectIsRegistered::class,
+        UsersM2MClientIsAccepted::class,
+    ];
+
     public function boot(): void
     {
         $this->loadRoutesFrom(__DIR__ . '/../../routes/web.php');
@@ -44,6 +58,27 @@ class GatekeeperServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__ . '/../../config/gatekeeper.php', 'gatekeeper');
+
+        $this->registerDoctorDiagnostics();
+    }
+
+    /**
+     * laravel/doctor is optional (it requires Laravel 12); apps without it get no diagnostics.
+     */
+    protected function registerDoctorDiagnostics(): void
+    {
+        if (!$this->doctorIsInstalled()) {
+            return;
+        }
+
+        $this->app->extend(Doctor::class, fn(Doctor $doctor): Doctor => $doctor->diagnostics(self::DOCTOR_DIAGNOSTICS));
+    }
+
+    protected function doctorIsInstalled(): bool
+    {
+        $isInstalled = class_exists(Doctor::class);
+
+        return $isInstalled;
     }
 
     protected function registerTokenUsersGuard(): void

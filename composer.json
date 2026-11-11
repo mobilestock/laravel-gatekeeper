@@ -26,6 +26,9 @@
     "illuminate/contracts": "^11.29 || ^12.0",
     "illuminate/routing": "^11.29 || ^12.0"
   },
+  "suggest": {
+    "laravel/doctor": "Registers the users-api login and M2M diagnostics in artisan doctor (requires Laravel 12)."
+  },
   "extra": {
     "laravel": {
       "providers": [
@@ -36,7 +39,8 @@
   "require-dev": {
     "pestphp/pest": "^3.5",
     "orchestra/testbench": "^9.5 || ^10.0",
-    "guzzlehttp/guzzle": "^7.9"
+    "guzzlehttp/guzzle": "^7.9",
+    "laravel/doctor": "^0.1"
   },
   "config": {
     "allow-plugins": {
