@@ -72,35 +72,44 @@ describe('check', function () {
             ->and($result->details)->toBe('A users-api não conhece o scope login:users configurado.');
     });
 
-    it('should fail without a request when the M2M credentials are incomplete', function (string $key) {
-        Config::set("services.users.m2m.$key", '');
-        Http::fake();
+    describe('without a request', function () {
+        beforeEach(function () {
+            Http::fake();
+        });
 
-        $result = $this->diagnostic->check();
+        it('should fail when the M2M credentials are incomplete', function (string $key, ?string $value) {
+            Config::set("services.users.m2m.$key", $value);
 
-        expect($result->status)->toBe(Status::Fail)
-            ->and($result->details)->toBe('Configure o endpoint e as credenciais M2M da users-api.');
-        Http::assertNothingSent();
-    })->with(['client_id', 'client_secret']);
+            $result = $this->diagnostic->check();
 
-    it('should fail without a request when USERS_APP_URL is empty', function () {
-        Config::set('gatekeeper.users_api_url', '');
-        Http::fake();
+            expect($result->status)->toBe(Status::Fail)
+                ->and($result->details)->toBe('Configure o endpoint e as credenciais M2M da users-api.');
+            Http::assertNothingSent();
+        })->with([
+            'missing client_id' => ['client_id', null],
+            'empty client_secret' => ['client_secret', ''],
+            'blank client_id' => ['client_id', '   '],
+            'blank client_secret' => ['client_secret', "\n"],
+        ]);
 
-        $result = $this->diagnostic->check();
+        it('should fail when USERS_APP_URL is empty', function () {
+            Config::set('gatekeeper.users_api_url', '');
 
-        expect($result->status)->toBe(Status::Fail);
-        Http::assertNothingSent();
-    });
+            $result = $this->diagnostic->check();
 
-    it('should skip when the app has no M2M client', function () {
-        Config::set('services.users', ['client_id' => 'login-client']);
-        Http::fake();
+            expect($result->status)->toBe(Status::Fail)
+                ->and($result->details)->toBe('Configure o endpoint e as credenciais M2M da users-api.');
+            Http::assertNothingSent();
+        });
 
-        $result = $this->diagnostic->check();
+        it('should skip when the app has no M2M client', function () {
+            Config::set('services.users', ['client_id' => 'login-client']);
 
-        expect($result->status)->toBe(Status::Skip)
-            ->and($result->details)->toBe('O app não usa cliente M2M da users-api.');
-        Http::assertNothingSent();
+            $result = $this->diagnostic->check();
+
+            expect($result->status)->toBe(Status::Skip)
+                ->and($result->details)->toBe('O app não usa cliente M2M da users-api.');
+            Http::assertNothingSent();
+        });
     });
 });

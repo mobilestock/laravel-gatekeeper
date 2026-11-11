@@ -79,6 +79,16 @@ describe('payloads', function () {
     ]);
 });
 
+describe('configure', function () {
+    it('should bound the connection and the answer time', function () {
+        $pendingRequest = Http::createPendingRequest();
+
+        $request = UsersOAuthProbe::configure($pendingRequest);
+
+        expect($request->getOptions())->toMatchArray(['connect_timeout' => 5, 'timeout' => 10]);
+    });
+});
+
 describe('send', function () {
     it('should post the form to the token URL as JSON-accepting request', function () {
         Http::fake(['https://users-api.test/oauth/token' => Http::response(['error' => 'invalid_request'], 400)]);
@@ -131,16 +141,26 @@ describe('send', function () {
 });
 
 describe('authorizationCodeVerdict', function () {
-    it('should accept the client when only the code is rejected', function (int $status, string $error) {
-        $response = usersOAuthResponse($status, ['error' => $error]);
+    it('should accept the client when only the code is rejected', function (array $body) {
+        $response = usersOAuthResponse(400, $body);
 
         $verdict = UsersOAuthProbe::authorizationCodeVerdict($response);
 
         expect($verdict)->toBe(ClientVerdict::ACCEPTED);
     })->with([
-        'invalid_request' => [400, 'invalid_request'],
-        'invalid_grant' => [400, 'invalid_grant'],
+        'invalid_request without hint' => [['error' => 'invalid_request']],
+        'code that does not decrypt' => [['error' => 'invalid_request', 'hint' => 'Cannot decrypt the authorization code']],
+        'hint names the code' => [['error' => 'invalid_request', 'hint' => 'Check the `code` parameter']],
+        'invalid_grant' => [['error' => 'invalid_grant']],
     ]);
+
+    it('should report an invalid_request about another parameter, since the client was never validated', function (string $parameter) {
+        $response = usersOAuthResponse(400, ['error' => 'invalid_request', 'hint' => "Check the `$parameter` parameter"]);
+
+        $verdict = fn() => UsersOAuthProbe::authorizationCodeVerdict($response);
+
+        expect($verdict)->toThrow(RuntimeException::class, 'Resposta inesperada da users-api: HTTP 400, erro invalid_request.');
+    })->with(['client_id', 'client_secret', 'redirect_uri']);
 
     it('should reject the client on invalid_client', function () {
         $response = usersOAuthResponse(401, ['error' => 'invalid_client']);
@@ -170,6 +190,22 @@ describe('authorizationCodeVerdict', function () {
         'unsafe error text' => [
             fn() => usersOAuthResponse(400, ['error' => 'Bearer sensitive-token']),
             'Resposta inesperada da users-api: HTTP 400.',
+        ],
+        'invalid_request outside 400' => [
+            fn() => usersOAuthResponse(500, ['error' => 'invalid_request']),
+            'Resposta inesperada da users-api: HTTP 500, erro invalid_request.',
+        ],
+        'invalid_client outside 401' => [
+            fn() => usersOAuthResponse(400, ['error' => 'invalid_client']),
+            'Resposta inesperada da users-api: HTTP 400, erro invalid_client.',
+        ],
+        'unauthorized_client' => [
+            fn() => usersOAuthResponse(400, ['error' => 'unauthorized_client']),
+            'Resposta inesperada da users-api: HTTP 400, erro unauthorized_client.',
+        ],
+        'unsupported_grant_type' => [
+            fn() => usersOAuthResponse(400, ['error' => 'unsupported_grant_type']),
+            'Resposta inesperada da users-api: HTTP 400, erro unsupported_grant_type.',
         ],
     ]);
 });
@@ -213,5 +249,10 @@ describe('clientCredentialsVerdict', function () {
     })->with([
         'issued token' => [200, ['access_token' => 'sensitive-token']],
         'other 400' => [400, ['error' => 'invalid_request']],
+        'invalid_client outside 401' => [400, ['error' => 'invalid_client']],
+        'invalid_scope outside 400' => [
+            500,
+            ['error' => 'invalid_scope', 'hint' => 'Check the `' . UsersOAuthProbe::INVALID_SCOPE . '` scope'],
+        ],
     ]);
 });

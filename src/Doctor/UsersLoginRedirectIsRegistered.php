@@ -20,7 +20,7 @@ class UsersLoginRedirectIsRegistered extends UsersDiagnostic
         $clientSecret = (string) Config::get('services.users.client_secret');
         $redirectUri = (string) Config::get('services.users.redirect');
 
-        if ($clientId === '' || $clientSecret === '') {
+        if (trim($clientId) === '' || trim($clientSecret) === '') {
             throw new DiagnosticSkipped('Depende do cliente de login; veja o diagnóstico do cliente.');
         }
 

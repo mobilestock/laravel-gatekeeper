@@ -19,7 +19,7 @@ class UsersLoginClientIsAccepted extends UsersDiagnostic
         $clientId = (string) Config::get('services.users.client_id');
         $clientSecret = (string) Config::get('services.users.client_secret');
 
-        if ($clientId === '' || $clientSecret === '') {
+        if (trim($clientId) === '' || trim($clientSecret) === '') {
             throw new RuntimeException('Configure USERS_CLIENT_ID e USERS_CLIENT_SECRET.');
         }
 

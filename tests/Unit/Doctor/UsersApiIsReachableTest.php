@@ -33,6 +33,19 @@ describe('check', function () {
         });
     });
 
+    it('should bound the wait and not follow redirects', function () {
+        Http::fake(function (Request $request, array $options) {
+            $this->requestOptions = $options;
+            $response = Http::response(['message' => 'Unauthenticated.'], 401);
+
+            return $response;
+        });
+
+        $this->diagnostic->check();
+
+        expect($this->requestOptions)->toMatchArray(['connect_timeout' => 5, 'timeout' => 10, 'allow_redirects' => false]);
+    });
+
     it('should fail and name USERS_APP_URL for any other status', function (int $status) {
         Http::fake(['https://users-api.test/api/me' => Http::response('', $status)]);
 

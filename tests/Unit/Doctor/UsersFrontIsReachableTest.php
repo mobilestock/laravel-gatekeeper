@@ -2,6 +2,7 @@
 
 use GuzzleHttp\Psr7\Response as Psr7Response;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Request;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Config;
@@ -23,6 +24,19 @@ describe('check', function () {
 
         expect($result->status)->toBe(Status::Pass);
         Http::assertSentCount(1);
+    });
+
+    it('should bound the wait for the login page', function () {
+        Http::fake(function (Request $request, array $options) {
+            $this->requestOptions = $options;
+            $response = Http::response('<html></html>');
+
+            return $response;
+        });
+
+        $this->diagnostic->check();
+
+        expect($this->requestOptions)->toMatchArray(['connect_timeout' => 5, 'timeout' => 10]);
     });
 
     it('should fail and name USERS_FRONT_URL for any other status', function (int $status) {

@@ -46,17 +46,15 @@ class UsersM2MClientIsAccepted extends UsersDiagnostic
         }
 
         foreach ($clients as $client) {
-            $hasCredentials = !empty($client['token_url']) && !empty($client['client_id']) && !empty($client['client_secret']);
+            $clientId = (string) $client['client_id'];
+            $clientSecret = (string) $client['client_secret'];
+            $hasCredentials = !empty($client['token_url']) && trim($clientId) !== '' && trim($clientSecret) !== '';
 
             if (!$hasCredentials) {
                 throw new RuntimeException('Configure o endpoint e as credenciais M2M da users-api.');
             }
 
-            $payload = UsersOAuthProbe::clientCredentialsPayload(
-                $client['client_id'],
-                $client['client_secret'],
-                $client['scope']
-            );
+            $payload = UsersOAuthProbe::clientCredentialsPayload($clientId, $clientSecret, $client['scope']);
             $response = UsersOAuthProbe::send($payload, $client['token_url']);
             $verdict = UsersOAuthProbe::clientCredentialsVerdict($response);
 

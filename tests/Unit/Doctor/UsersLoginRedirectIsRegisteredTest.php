@@ -53,24 +53,50 @@ describe('check', function () {
         Http::assertSentCount(1);
     });
 
-    it('should skip without a request when the client is not configured', function () {
-        Config::set('services.users.client_secret', '');
-        Http::fake();
-
-        $result = $this->diagnostic->check();
-
-        expect($result->status)->toBe(Status::Skip);
-        Http::assertNothingSent();
-    });
-
-    it('should fail without a request when USERS_REDIRECT_URI is empty', function () {
-        Config::set('services.users.redirect', null);
-        Http::fake();
+    it('should fail when users-api never identified the client', function () {
+        Config::set('services.users.client_id', "\u{200B}");
+        Http::fake([
+            'https://users-api.test/oauth/token' => Http::response(
+                ['error' => 'invalid_request', 'hint' => 'Check the `client_id` parameter'],
+                400
+            ),
+        ]);
 
         $result = $this->diagnostic->check();
 
         expect($result->status)->toBe(Status::Fail)
-            ->and($result->details)->toBe('Configure USERS_REDIRECT_URI.');
-        Http::assertNothingSent();
+            ->and($result->details)->toBe('Resposta inesperada da users-api: HTTP 400, erro invalid_request.');
+        Http::assertSentCount(1);
+    });
+
+    describe('without a request', function () {
+        beforeEach(function () {
+            Http::fake();
+        });
+
+        it('should skip when the client is not configured', function (string $key, ?string $value) {
+            Config::set("services.users.$key", $value);
+
+            $result = $this->diagnostic->check();
+
+            expect($result->status)->toBe(Status::Skip)
+                ->and($result->details)->toBe('Depende do cliente de login; veja o diagnóstico do cliente.');
+            Http::assertNothingSent();
+        })->with([
+            'missing client_id' => ['client_id', null],
+            'empty client_secret' => ['client_secret', ''],
+            'blank client_id' => ['client_id', '   '],
+            'blank client_secret' => ['client_secret', "\n"],
+        ]);
+
+        it('should fail when USERS_REDIRECT_URI is empty', function () {
+            Config::set('services.users.redirect', null);
+
+            $result = $this->diagnostic->check();
+
+            expect($result->status)->toBe(Status::Fail)
+                ->and($result->details)->toBe('Configure USERS_REDIRECT_URI.');
+            Http::assertNothingSent();
+        });
     });
 });

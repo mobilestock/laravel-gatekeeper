@@ -14,8 +14,10 @@ use RuntimeException;
  * (laravel/passport 12.4, league/oauth2-server 8.5) on 2026-11-11:
  *
  * - authorization_code with an invalid code: the client is validated first (secret, revoked, grant,
- *   and redirect_uri when sent), so a good client gets HTTP 400 invalid_request and a bad one gets
- *   HTTP 401 invalid_client. The code never decrypts, so no token is issued.
+ *   and redirect_uri when sent), so a good client gets HTTP 400 invalid_request about the code and a
+ *   bad one gets HTTP 401 invalid_client. The code never decrypts, so no token is issued. An
+ *   invalid_request whose hint names another parameter ("Check the `client_id` parameter", e.g. a
+ *   client_id that users-api trims to empty) comes before the client validation and proves nothing.
  * - client_credentials with an unknown scope: the client is validated before the scopes, so a good
  *   client gets HTTP 400 invalid_scope and a bad one HTTP 401 invalid_client. The hint names the
  *   first unknown scope, which also proves the configured scopes exist. No token is issued.
@@ -101,8 +103,11 @@ final class UsersOAuthProbe
     {
         $status = $response->status();
         $error = $response->json('error');
+        $invalidParameter = self::invalidRequestParameter($response);
+        $rejectsOnlyTheCode = $error === 'invalid_grant'
+            || ($error === 'invalid_request' && in_array($invalidParameter, [null, 'code'], true));
 
-        if ($status === 400 && in_array($error, ['invalid_request', 'invalid_grant'], true)) {
+        if ($status === 400 && $rejectsOnlyTheCode) {
             return ClientVerdict::ACCEPTED;
         }
 
@@ -134,6 +139,20 @@ final class UsersOAuthProbe
         }
 
         return ClientVerdict::ACCEPTED;
+    }
+
+    /**
+     * league/oauth2-server names the missing or invalid parameter in the hint of invalid_request
+     * ("Check the `client_id` parameter"). Its hints about the code name `code` or no parameter at all
+     * ("Cannot decrypt the authorization code").
+     */
+    private static function invalidRequestParameter(Response $response): ?string
+    {
+        $hint = $response->json('hint');
+        $namesParameter = is_string($hint) && preg_match('/^Check the `([^`]+)` parameter$/', $hint, $matches) === 1;
+        $parameter = $namesParameter ? $matches[1] : null;
+
+        return $parameter;
     }
 
     private static function unexpected(Response $response): string
